@@ -1,5 +1,5 @@
 require "coinsync/version"
 
-module Coinsync
+module CoinSync
   # Your code goes here...
 end

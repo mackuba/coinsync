@@ -1,8 +1,8 @@
 require "spec_helper"
 
-describe Coinsync do
+describe CoinSync do
   it "has a version number" do
-    expect(Coinsync::VERSION).not_to be nil
+    expect(CoinSync::VERSION).not_to be nil
   end
 
   # who needs tests, yolo
