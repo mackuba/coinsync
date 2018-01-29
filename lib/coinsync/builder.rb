@@ -14,10 +14,10 @@ module CoinSync
     end
 
     def build(filename)
-      @config.each do |entry|
-        parser = @parsers[entry['format'].to_sym] or raise "Unknown format: #{entry['format']}"
+      @config.each do |key, params|
+        parser = @parsers[params['format'].to_sym] or raise "Unknown format for '#{key}': #{params['format']}"
 
-        File.open(entry['file'], 'r') do |file|
+        File.open(params['file'], 'r') do |file|
           transactions = parser.process(file)
 
           CSV.open(filename, 'w', col_sep: ';') do |output|
