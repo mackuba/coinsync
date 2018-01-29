@@ -1,3 +1,4 @@
+require "coinsync/builder"
 require "coinsync/version"
 
 module CoinSync

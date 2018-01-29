@@ -1,4 +1,6 @@
 /.bundle
 /*.gem
+/config.yml
 /Gemfile.lock
 .DS_Store
+build

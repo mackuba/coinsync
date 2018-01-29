@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'coinsync'
+
+require 'fileutils'
+require 'yaml'
+
+command = ARGV[0]
+
+case command
+when nil
+  puts "Usage:"
+  puts "  coinsync import - import transaction logs from exchanges"
+  puts "  coinsync build - build the input csv from exchange logs"
+  puts "  coinsync process - generate the output csv from the input"
+  puts "  coinsync run - run the complete process"
+
+when 'build'
+  FileUtils.mkdir_p 'build'
+  CoinSync::Builder.new(YAML.load(File.read('config.yml'))).build('build/input.csv')
+
+else
+  raise "Unknown command #{command}"
+
+end
