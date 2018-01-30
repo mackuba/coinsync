@@ -26,7 +26,8 @@ module CoinSync
       end
 
       CSV.open(filename, 'w', col_sep: ';') do |output|
-        transactions.sort_by { |tx| tx.time }.each do |tx|
+        transactions.sort_by { |tx| tx.time }.each_with_index do |tx, i|
+          tx.number = i + 1
           output << tx.to_line
         end
       end
