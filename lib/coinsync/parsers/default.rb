@@ -3,6 +3,11 @@ require_relative '../transaction'
 module CoinSync
   module Parsers
     class Default
+      def initialize(settings = {})
+        @settings = settings
+        @labels = @settings['labels'] || {}
+      end
+
       def process(source)
       end
 
@@ -18,10 +23,12 @@ module CoinSync
           raise "Currently unsupported"
         end
 
+        tx_type = tx.type.to_s
+
         [
           tx.number || 0,
           tx.exchange,
-          tx.type.to_s.capitalize,
+          @labels[tx_type] || tx_type.capitalize,
           tx.time,
           format_float(amount, 8),
           format_float(total, 4),

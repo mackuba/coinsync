@@ -5,6 +5,8 @@ module CoinSync
     def initialize(config)
       @parsers = {}
       @config = config
+      @inputs = @config['inputs']
+      @settings = @config['settings'] || {}
 
       register_parser :kraken, Parsers::Kraken
       register_parser :bitbay20, Parsers::BitBay20
@@ -17,7 +19,7 @@ module CoinSync
     def build(filename, &block)
       transactions = []
 
-      @config.each do |key, params|
+      @inputs.each do |key, params|
         parser = @parsers[params['format'].to_sym] or raise "Unknown format for '#{key}': #{params['format']}"
 
         File.open(params['file'], 'r') do |file|
@@ -26,7 +28,7 @@ module CoinSync
       end
 
       if block.nil?
-        formatter = Parsers::Default.new
+        formatter = Parsers::Default.new(@settings)
         block = proc { |tx, csv| csv << formatter.save_to_csv(tx) }
       end
 
