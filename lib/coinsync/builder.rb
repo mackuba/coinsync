@@ -10,6 +10,7 @@ module CoinSync
 
       register_parser :bitbay20, Parsers::BitBay20
       register_parser :bitcurex, Parsers::Bitcurex
+      register_parser :circle, Parsers::Circle
       register_parser :kraken, Parsers::Kraken
     end
 
