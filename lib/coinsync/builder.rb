@@ -15,17 +15,19 @@ module CoinSync
     end
 
     def build(filename)
+      transactions = []
+
       @config.each do |key, params|
         parser = @parsers[params['format'].to_sym] or raise "Unknown format for '#{key}': #{params['format']}"
 
         File.open(params['file'], 'r') do |file|
-          transactions = parser.process(file)
+          transactions.concat(parser.process(file))
+        end
+      end
 
-          CSV.open(filename, 'w', col_sep: ';') do |output|
-            transactions.each do |tx|
-              output << tx.to_line
-            end
-          end
+      CSV.open(filename, 'w', col_sep: ';') do |output|
+        transactions.sort_by { |tx| tx.time }.each do |tx|
+          output << tx.to_line
         end
       end
     end
