@@ -7,6 +7,7 @@ module CoinSync
       @config = config
 
       register_parser :kraken, Parsers::Kraken
+      register_parser :bitbay20, Parsers::BitBay20
     end
 
     def register_parser(name, klass)
