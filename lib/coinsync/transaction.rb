@@ -42,11 +42,15 @@ module CoinSync
         raise "Transaction: '#{bought_amount}' is not a number"
       end
 
+      (bought_amount > 0) or raise "Transaction: bought_amount should be positive (#{bought_amount})"
+
       if sold_amount.is_a?(Numeric)
         @sold_amount = sold_amount
       else
         raise "Transaction: '#{sold_amount}' is not a number"
       end
+
+      (sold_amount > 0) or raise "Transaction: sold_amount should be positive (#{sold_amount})"
     end
 
     def type
