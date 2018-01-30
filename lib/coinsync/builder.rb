@@ -14,7 +14,7 @@ module CoinSync
       @parsers[name] = klass.new
     end
 
-    def build(filename)
+    def build(filename, &block)
       transactions = []
 
       @config.each do |key, params|
@@ -25,12 +25,15 @@ module CoinSync
         end
       end
 
-      formatter = Parsers::Default.new
+      if block.nil?
+        formatter = Parsers::Default.new
+        block = proc { |tx, csv| csv << formatter.save_to_csv(tx) }
+      end
 
-      CSV.open(filename, 'w', col_sep: ';') do |output|
+      CSV.open(filename, 'w', col_sep: ';') do |csv|
         transactions.sort_by { |tx| tx.time }.each_with_index do |tx, i|
           tx.number = i + 1
-          output << formatter.save_to_csv(tx)
+          block.call(tx, csv)
         end
       end
     end
