@@ -60,31 +60,5 @@ module CoinSync
         return TYPE_SALE
       end
     end
-
-    def format_float(value, prec)
-      sprintf("%.#{prec}f", value).gsub(/\./, ',')
-    end
-
-    def to_line
-      if type == TYPE_PURCHASE
-        amount = bought_amount
-        total = sold_amount
-      elsif type == TYPE_SALE
-        amount = sold_amount
-        total = bought_amount
-      else
-        raise "Currently unsupported"
-      end
-
-      [
-        number || 0,
-        exchange,
-        type.to_s.capitalize,
-        time,
-        format_float(amount, 8),
-        format_float(total, 4),
-        format_float(total / amount, 4)
-      ]
-    end
   end
 end

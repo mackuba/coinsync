@@ -25,10 +25,12 @@ module CoinSync
         end
       end
 
+      formatter = Parsers::Default.new
+
       CSV.open(filename, 'w', col_sep: ';') do |output|
         transactions.sort_by { |tx| tx.time }.each_with_index do |tx, i|
           tx.number = i + 1
-          output << tx.to_line
+          output << formatter.save_to_csv(tx)
         end
       end
     end
