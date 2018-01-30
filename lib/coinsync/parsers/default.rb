@@ -6,6 +6,7 @@ module CoinSync
       def initialize(settings = {})
         @settings = settings
         @labels = @settings['labels'] || {}
+        @decimal_separator = @settings['decimal_separator']
       end
 
       def process(source)
@@ -39,7 +40,9 @@ module CoinSync
       private
 
       def format_float(value, prec)
-        sprintf("%.#{prec}f", value).gsub(/\./, ',')
+        s = sprintf("%.#{prec}f", value)
+        s.gsub!(/\./, @decimal_separator) if @decimal_separator
+        s
       end
     end
   end
