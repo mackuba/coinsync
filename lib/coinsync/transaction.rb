@@ -1,65 +1,90 @@
-def parse_float(string)
-  string.gsub(/,/, '.').to_f
-end
-
-def format_float(value, prec)
-  sprintf("%.#{prec}f", value).gsub(/\./, ',')
-end
+require_relative 'currencies'
 
 module CoinSync
   class Transaction
-    attr_accessor :lp, :source, :type, :date, :btc_amount, :price, :input
+    TYPE_PURCHASE = :purchase
+    TYPE_SALE = :sale
+    TYPE_SWAP = :swap
 
-    def self.from_line(line)
-      lp = line[0].to_i
-      source = line[1]
-      type = line[2]
-      date = line[3]
-      btc_amount = parse_float(line[4])
-      price = parse_float(line[6])
-    
-      new(lp: lp, source: source, type: type, date: date, btc_amount: btc_amount, price: price)
+    attr_reader :number, :exchange, :bought_currency, :sold_currency, :time, :bought_amount, :sold_amount
+    attr_writer :number
+
+    def initialize(number: nil, exchange:, bought_currency:, sold_currency:, time:, bought_amount:, sold_amount:)
+      if number.nil? || number.is_a?(Integer)
+        @number = number
+      else
+        raise "Transaction: '#{number}' is not an integer"
+      end
+
+      @exchange = exchange
+
+      if bought_currency.is_a?(Currency)
+        @bought_currency = bought_currency
+      else
+        raise "Transaction: '#{bought_currency}' is not a valid currency"
+      end
+
+      if sold_currency.is_a?(Currency)
+         @sold_currency = sold_currency
+      else
+        raise "Transaction: '#{sold_currency}' is not a valid currency"
+      end
+
+      if time.is_a?(Time)
+        @time = time
+      else
+        raise "Transaction: '#{time}' is not a valid Time object"
+      end
+
+      if bought_amount.is_a?(Numeric)
+        @bought_amount = bought_amount
+      else
+        raise "Transaction: '#{bought_amount}' is not a number"
+      end
+
+      if sold_amount.is_a?(Numeric)
+        @sold_amount = sold_amount
+      else
+        raise "Transaction: '#{sold_amount}' is not a number"
+      end
     end
 
-    def initialize(lp:, source:, type:, date:, btc_amount:, price:, input: nil, amount: nil)
-      @lp = lp
-      @source = source
-      @type = type
-      @date = date
-      @btc_amount = btc_amount
-      @price = price
-      @input = input
-      @amount = amount
+    def type
+      if bought_currency.is_a?(CryptoCurrency)
+        if sold_currency.is_a?(CryptoCurrency)
+          return TYPE_SWAP
+        else
+          return TYPE_PURCHASE
+        end
+      else
+        return TYPE_SALE
+      end
     end
 
-    def buy?
-      type.downcase == "kup"
+    def format_float(value, prec)
+      sprintf("%.#{prec}f", value).gsub(/\./, ',')
     end
 
     def to_line
-      amount = @amount || @btc_amount
-
-      data = [
-        lp,
-        source,
-        type,
-        date,
-        format_float(amount, 8),
-        format_float(amount * price, 4),
-        format_float(price, 4)
-      ]
-
-      if input
-        data += [
-          input.lp,
-          format_float(input.price, 4),
-          format_float(amount * input.price, 4),
-          format_float(amount * price, 4),
-          format_float(amount * (price - input.price), 4)
-        ]
+      if type == TYPE_PURCHASE
+        amount = bought_amount
+        total = sold_amount
+      elsif type == TYPE_SALE
+        amount = sold_amount
+        total = bought_amount
+      else
+        raise "Currently unsupported"
       end
 
-      data
+      [
+        number || 0,
+        exchange,
+        type.to_s.capitalize,
+        time,
+        format_float(amount, 8),
+        format_float(total, 4),
+        format_float(total / amount, 4)
+      ]
     end
   end
 end

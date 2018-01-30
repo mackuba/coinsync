@@ -1,5 +1,7 @@
 require 'csv'
 require 'time'
+
+require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
@@ -14,14 +16,24 @@ module CoinSync
           @time = Time.parse(line[2])
           @type = line[3]
           @aclass = line[4]
-          @asset = line[5]
+          @asset = parse_currency(line[5])
           @amount = line[6].to_f
           @fee = line[7].to_f
           @balance = line[8].to_f
         end
 
+        def parse_currency(code)
+          case code
+          when 'XXBT' then CryptoCurrency.new('BTC')
+          when 'XXLM' then CryptoCurrency.new('XLM')
+          when 'ZEUR' then FiatCurrency.new('EUR')
+          when 'ZUSD' then FiatCurrency.new('USD')
+          else raise "Unknown currency: #{code}"
+          end
+        end
+
         def crypto?
-          @asset != 'ZEUR'
+          @asset.is_a?(CryptoCurrency)
         end
       end
 
@@ -56,21 +68,21 @@ module CoinSync
 
           if crypto.amount > 0
             transactions << Transaction.new(
-              lp: 0,
-              source: 'Kraken',
-              type: 'Kup',
-              date: crypto.time,
-              btc_amount: crypto.amount - crypto.fee,
-              price: -(fiat.amount - fiat.fee) / (crypto.amount - crypto.fee)
+              exchange: 'Kraken',
+              bought_currency: crypto.asset,
+              sold_currency: fiat.asset,
+              time: crypto.time,
+              bought_amount: crypto.amount - crypto.fee,
+              sold_amount: -(fiat.amount - fiat.fee)
             )
           elsif crypto.amount < 0
             transactions << Transaction.new(
-              lp: 0,
-              source: 'Kraken',
-              type: 'Sprzedaj',
-              date: crypto.time,
-              btc_amount: -(crypto.amount - crypto.fee),
-              price: (fiat.amount - fiat.fee) / -(crypto.amount - crypto.fee)
+              exchange: 'Kraken',
+              bought_currency: fiat.asset,
+              sold_currency: crypto.asset,
+              time: crypto.time,
+              bought_amount: fiat.amount - fiat.fee,
+              sold_amount: -(crypto.amount - crypto.fee)
             )
           else
             raise "Kraken importer error: unexpected amount 0"
