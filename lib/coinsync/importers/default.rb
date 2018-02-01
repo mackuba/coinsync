@@ -2,7 +2,7 @@ require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
-  module Parsers
+  module Importers
     class Default
       class HistoryEntry
         attr_accessor :lp, :exchange, :type, :date, :amount, :asset, :total, :currency

@@ -5,7 +5,7 @@ require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
-  module Parsers
+  module Importers
     class Kraken
       class LedgerEntry
         attr_accessor :txid, :refid, :time, :type, :aclass, :asset, :amount, :fee, :balance

@@ -5,7 +5,7 @@ require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
-  module Parsers
+  module Importers
     class Bitcurex
       class HistoryEntry
         attr_accessor :lp, :type, :date, :market, :amount, :price, :total, :fee, :fee_currency, :id

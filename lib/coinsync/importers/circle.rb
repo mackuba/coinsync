@@ -5,7 +5,7 @@ require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
-  module Parsers
+  module Importers
     class Circle
       class HistoryEntry
         attr_accessor :date, :id, :type, :from_account, :to_account, :from_amount, :from_currency,

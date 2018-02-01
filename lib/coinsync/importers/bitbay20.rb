@@ -3,7 +3,7 @@ require 'time'
 require_relative '../transaction'
 
 module CoinSync
-  module Parsers
+  module Importers
     class BitBay20
       OP_PAY_BUYING = 'Pay for buying currency'
       OP_PAY_SELLING = 'Pay for selling currency'
