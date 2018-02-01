@@ -1,5 +1,7 @@
 require 'csv'
 require 'time'
+
+require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
