@@ -15,6 +15,11 @@ module CoinSync
       end
 
       def convert(amount, from:, to:, date:)
+        (amount > 0) or raise "Fixer: amount should be positive"
+        (from.is_a?(FiatCurrency)) or raise "Fixer: 'from' should be a FiatCurrency"
+        (to.is_a?(FiatCurrency)) or raise "Fixer: 'to' should be a FiatCurrency"
+        (date.is_a?(Date)) or raise "Fixer: 'date' should be a Date"
+
         @rates[from] ||= {}
         return @rates[from][date] * amount if @rates[from][date]
 
