@@ -37,7 +37,7 @@ module CoinSync
         end
       end
 
-      def process(source)
+      def read_transaction_list(source)
         csv = CSV.new(source, col_sep: ',')
 
         matching = nil

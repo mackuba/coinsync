@@ -23,7 +23,7 @@ module CoinSync
         importer = @importers[params['type'].to_sym] or raise "Unknown source type for '#{key}': #{params['type']}"
 
         File.open(params['file'], 'r') do |file|
-          transactions.concat(parser.process(file))
+          transactions.concat(importer.read_transaction_list(file))
         end
       end
 

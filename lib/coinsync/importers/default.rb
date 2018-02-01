@@ -14,7 +14,7 @@ module CoinSync
         @decimal_separator = @settings['decimal_separator']
       end
 
-      def process(source)
+      def read_transaction_list(source)
         csv = CSV.new(source, col_sep: @settings['column_separator'] || ',')
 
         transactions = []
