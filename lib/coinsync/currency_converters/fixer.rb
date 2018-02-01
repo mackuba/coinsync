@@ -10,7 +10,14 @@ module CoinSync
       class NoDataException < Exception; end
       class BadRequestException < Exception; end
 
+      def initialize
+        @rates = {}
+      end
+
       def convert(amount, from:, to:, date:)
+        @rates[from] ||= {}
+        return @rates[from][date] * amount if @rates[from][date]
+
         url = URI("#{BASE_URL}/#{date}?base=#{from}")
         response = Net::HTTP.get_response(url)
 
@@ -19,6 +26,8 @@ module CoinSync
           json = JSON.load(response.body)
           rate = json['rates'][to.upcase]
           raise NoDataException.new("No exchange rate found for #{to.upcase}") if rate.nil?
+
+          @rates[from][date] = rate
 
           return rate * amount
         when Net::HTTPBadRequest
