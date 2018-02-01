@@ -64,5 +64,49 @@ module CoinSync
         return TYPE_SALE
       end
     end
+
+    def purchase?
+      type == TYPE_PURCHASE
+    end
+
+    def sale?
+      type == TYPE_SALE
+    end
+
+    def swap?
+      type == TYPE_SWAP
+    end
+
+    def fiat_amount
+      case type
+      when TYPE_PURCHASE then sold_amount
+      when TYPE_SALE then bought_amount
+      else raise "Operation not supported for crypto swap transactions"
+      end
+    end
+
+    def crypto_amount
+      case type
+      when TYPE_PURCHASE then bought_amount
+      when TYPE_SALE then sold_amount
+      else raise "Operation not supported for crypto swap transactions"
+      end
+    end
+
+    def fiat_currency
+      case type
+      when TYPE_PURCHASE then sold_currency
+      when TYPE_SALE then bought_currency
+      else raise "Operation not supported for crypto swap transactions"
+      end
+    end
+
+    def crypto_currency
+      case type
+      when TYPE_PURCHASE then bought_currency
+      when TYPE_SALE then sold_currency
+      else raise "Operation not supported for crypto swap transactions"
+      end
+    end
   end
 end

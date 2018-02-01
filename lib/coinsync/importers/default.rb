@@ -56,21 +56,12 @@ module CoinSync
       end
 
       def save_to_csv(tx)
-        case tx.type
-        when Transaction::TYPE_PURCHASE
-          amount = tx.bought_amount
-          total = tx.sold_amount
-          asset = tx.bought_currency.code
-          currency = tx.sold_currency.code
-        when Transaction::TYPE_SALE
-          amount = tx.sold_amount
-          total = tx.bought_amount
-          asset = tx.sold_currency.code
-          currency = tx.bought_currency.code
-        else
-          raise "Currently unsupported"
-        end
+        raise "Currently unsupported" if tx.swap?
 
+        amount = tx.crypto_amount
+        total = tx.fiat_amount
+        asset = tx.crypto_currency.code
+        currency = tx.fiat_currency.code
         tx_type = tx.type.to_s
 
         [
