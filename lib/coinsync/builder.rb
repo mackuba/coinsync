@@ -3,15 +3,17 @@ Dir[File.join(File.dirname(__FILE__), 'parsers', '*.rb')].each { |f| load(f) }
 module CoinSync
   class Builder
     def initialize(config)
-      @parsers = {}
       @config = config
       @sources = @config['sources']
       @settings = @config['settings'] || {}
 
-      register_parser :bitbay20, Parsers::BitBay20
-      register_parser :bitcurex, Parsers::Bitcurex
-      register_parser :circle, Parsers::Circle
-      register_parser :kraken, Parsers::Kraken
+      @parsers = {
+        bitbay20: Parsers::BitBay20.new,
+        bitcurex: Parsers::Bitcurex.new,
+        circle: Parsers::Circle.new,
+        default: Parsers::Default.new(@settings),
+        kraken: Parsers::Kraken.new
+      }
     end
 
     def register_parser(name, klass)
