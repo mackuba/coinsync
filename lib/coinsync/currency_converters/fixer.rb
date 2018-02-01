@@ -18,14 +18,14 @@ module CoinSync
         @rates[from] ||= {}
         return @rates[from][date] * amount if @rates[from][date]
 
-        url = URI("#{BASE_URL}/#{date}?base=#{from}")
+        url = URI("#{BASE_URL}/#{date}?base=#{from.code}")
         response = Net::HTTP.get_response(url)
 
         case response
         when Net::HTTPSuccess
           json = JSON.load(response.body)
-          rate = json['rates'][to.upcase]
-          raise NoDataException.new("No exchange rate found for #{to.upcase}") if rate.nil?
+          rate = json['rates'][to.code.upcase]
+          raise NoDataException.new("No exchange rate found for #{to.code.upcase}") if rate.nil?
 
           @rates[from][date] = rate
 
