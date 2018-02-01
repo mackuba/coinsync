@@ -57,9 +57,13 @@ module CoinSync
         when Transaction::TYPE_PURCHASE
           amount = tx.bought_amount
           total = tx.sold_amount
+          asset = tx.bought_currency.code
+          currency = tx.sold_currency.code
         when Transaction::TYPE_SALE
           amount = tx.sold_amount
           total = tx.bought_amount
+          asset = tx.sold_currency.code
+          currency = tx.bought_currency.code
         else
           raise "Currently unsupported"
         end
@@ -72,8 +76,10 @@ module CoinSync
           @labels[tx_type] || tx_type.capitalize,
           tx.time,
           format_float(amount, 8),
+          asset,
           format_float(total, 4),
-          format_float(total / amount, 4)
+          format_float(total / amount, 4),
+          currency
         ]
       end
 
