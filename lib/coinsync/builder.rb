@@ -5,7 +5,7 @@ module CoinSync
     def initialize(config)
       @parsers = {}
       @config = config
-      @inputs = @config['inputs']
+      @sources = @config['sources']
       @settings = @config['settings'] || {}
 
       register_parser :bitbay20, Parsers::BitBay20
@@ -21,8 +21,8 @@ module CoinSync
     def build(filename, &block)
       transactions = []
 
-      @inputs.each do |key, params|
-        parser = @parsers[params['format'].to_sym] or raise "Unknown format for '#{key}': #{params['format']}"
+      @sources.each do |key, params|
+        parser = @parsers[params['type'].to_sym] or raise "Unknown source type for '#{key}': #{params['type']}"
 
         File.open(params['file'], 'r') do |file|
           transactions.concat(parser.process(file))
