@@ -4,6 +4,10 @@ Welcome to your new gem! In this directory, you'll find the files you need to be
 
 TODO: Delete this and the text above, and describe your gem
 
+## IMPORTANT
+
+These tools are provided without any warranty (just like the license says). None of them, including the FIFO part in particular, have been reviewed by any accountant or tax agency, and I cannot guarantee that they work correctly and follow the tax code of my own country, not to mention any other countries whose laws I'm completely unfamiliar with. You take full responsibility for any problems you might run into if you use them for your crypto tax calculations. Please verify and double-check any data you get from these scripts before you use it for anything serious.
+
 ## Installation
 
 Add this line to your application's Gemfile:
