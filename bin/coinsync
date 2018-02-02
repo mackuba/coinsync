@@ -18,7 +18,9 @@ when nil
 
 when 'build'
   FileUtils.mkdir_p 'build'
-  CoinSync::Builder.new(YAML.load(File.read('config.yml'))).build('build/input.csv')
+  config = CoinSync::Config.load_from_file('config.yml')
+  builder = CoinSync::Builder.new(config)
+  builder.build('build/input.csv')
 
 else
   raise "Unknown command #{command}"

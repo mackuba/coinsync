@@ -11,14 +11,14 @@ module CoinSync
         attr_accessor :lp, :exchange, :type, :date, :amount, :asset, :total, :currency
       end
 
-      def initialize(settings = {})
-        @settings = settings
-        @labels = @settings['labels'] || {}
-        @decimal_separator = @settings['decimal_separator']
+      def initialize(config)
+        @config = config
+        @labels = @config.settings['labels'] || {}
+        @decimal_separator = @config.custom_decimal_separator
       end
 
       def read_transaction_list(source)
-        csv = CSV.new(source, col_sep: @settings['column_separator'] || ',')
+        csv = CSV.new(source, col_sep: @config.column_separator)
 
         transactions = []
 
