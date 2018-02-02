@@ -43,6 +43,8 @@ module CoinSync
           end
         end
 
+        @converter.finalize
+
         puts
       end
     end

@@ -1,6 +1,8 @@
 require 'json'
 require 'net/http'
 
+require_relative 'cache'
+
 module CoinSync
   module CurrencyConverters
     class Fixer
@@ -11,7 +13,7 @@ module CoinSync
       class BadRequestException < Exception; end
 
       def initialize
-        @rates = {}
+        @cache = Cache.new('fixer')
       end
 
       def convert(amount, from:, to:, date:)
@@ -20,8 +22,7 @@ module CoinSync
         (to.is_a?(FiatCurrency)) or raise "Fixer: 'to' should be a FiatCurrency"
         (date.is_a?(Date)) or raise "Fixer: 'date' should be a Date"
 
-        @rates[from] ||= {}
-        return @rates[from][date] * amount if @rates[from][date]
+        return @cache[from, to, date] * amount if @cache[from, to, date]
 
         url = URI("#{BASE_URL}/#{date}?base=#{from.code}")
         response = Net::HTTP.get_response(url)
@@ -32,7 +33,7 @@ module CoinSync
           rate = json['rates'][to.code.upcase]
           raise NoDataException.new("No exchange rate found for #{to.code.upcase}") if rate.nil?
 
-          @rates[from][date] = rate
+          @cache[from, to, date] = rate
 
           return rate * amount
         when Net::HTTPBadRequest
@@ -40,6 +41,10 @@ module CoinSync
         else
           raise Exception.new(response)
         end
+      end
+
+      def finalize
+        @cache.save
       end
     end
   end
