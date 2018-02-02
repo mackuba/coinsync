@@ -26,6 +26,13 @@ when 'build'
   output = CoinSync::Outputs::Default.new(config, 'build/input.csv')
   output.process_transactions(builder.transactions)
 
+when 'summary'
+  config = CoinSync::Config.load_from_file('config.yml')
+  builder = CoinSync::Builder.new(config)
+  builder.build_transaction_list
+
+  CoinSync::Outputs::Summary.new.process_transactions(builder.transactions)
+
 else
   raise "Unknown command #{command}"
 
