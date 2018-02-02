@@ -31,11 +31,11 @@ module CoinSync
         end
 
         def crypto?
-          @currency.is_a?(CryptoCurrency)
+          @currency.crypto?
         end
 
         def fiat?
-          @currency.is_a?(FiatCurrency)
+          @currency.fiat?
         end
 
         def parse_currency(code)
