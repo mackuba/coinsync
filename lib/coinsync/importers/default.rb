@@ -13,8 +13,7 @@ module CoinSync
 
       def initialize(config)
         @config = config
-        @labels = @config.settings['labels'] || {}
-        @decimal_separator = @config.custom_decimal_separator
+        @decimal_separator = config.custom_decimal_separator
       end
 
       def read_transaction_list(source)
@@ -55,28 +54,6 @@ module CoinSync
         transactions
       end
 
-      def save_to_csv(tx)
-        raise "Currently unsupported" if tx.swap?
-
-        amount = tx.crypto_amount
-        total = tx.fiat_amount
-        asset = tx.crypto_currency.code
-        currency = tx.fiat_currency.code
-        tx_type = tx.type.to_s
-
-        [
-          tx.number || 0,
-          tx.exchange,
-          @labels[tx_type] || tx_type.capitalize,
-          tx.time,
-          format_float(amount, 8),
-          asset,
-          format_float(total, 4),
-          format_float(total / amount, 4),
-          currency
-        ]
-      end
-
       private
 
       def parse_line(line)
@@ -97,12 +74,6 @@ module CoinSync
       def parse_float(string)
         string = string.gsub(@decimal_separator, '.') if @decimal_separator
         string.to_f
-      end
-
-      def format_float(value, prec)
-        s = sprintf("%.#{prec}f", value)
-        s.gsub!(/\./, @decimal_separator) if @decimal_separator
-        s
       end
     end
   end

@@ -23,13 +23,8 @@ when 'build'
   builder = CoinSync::Builder.new(config)
   builder.build_transaction_list
 
-  formatter = CoinSync::Importers::Default.new(config)
-
-  CSV.open('build/input.csv', 'w', col_sep: config.column_separator) do |csv|
-    builder.transactions.each do |tx|
-      csv << formatter.save_to_csv(tx)
-    end
-  end
+  output = CoinSync::Outputs::Default.new(config, 'build/input.csv')
+  output.process_transactions(builder.transactions)
 
 else
   raise "Unknown command #{command}"
