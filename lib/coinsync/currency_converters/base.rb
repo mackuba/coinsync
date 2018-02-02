@@ -1,0 +1,31 @@
+require_relative 'cache'
+require_relative '../currencies'
+
+module CoinSync
+  module CurrencyConverters
+    class Base
+      def initialize
+        @cache = Cache.new(self.class.name.downcase.split('::').last)
+      end
+
+      def convert(amount, from:, to:, date:)
+        (amount > 0) or raise "#{self.class}: amount should be positive"
+        (from.is_a?(FiatCurrency)) or raise "#{self.class}: 'from' should be a FiatCurrency"
+        (to.is_a?(FiatCurrency)) or raise "#{self.class}: 'to' should be a FiatCurrency"
+        (date.is_a?(Date)) or raise "#{self.class}: 'date' should be a Date"
+
+        if rate = @cache[from, to, date]
+          return rate * amount
+        else
+          rate = fetch_conversion_rate(from: from, to: to, date: date)
+          @cache[from, to, date] = rate
+          return rate * amount
+        end
+      end
+
+      def finalize
+        @cache.save
+      end
+    end
+  end
+end

@@ -5,22 +5,24 @@ require_relative 'base'
 
 module CoinSync
   module CurrencyConverters
-    class Fixer < Base
-      BASE_URL = "https://api.fixer.io"
+    class NBP < Base
+      BASE_URL = "https://api.nbp.pl/api"
 
       class Exception < StandardError; end
       class NoDataException < Exception; end
       class BadRequestException < Exception; end
 
       def fetch_conversion_rate(from:, to:, date:)
-        url = URI("#{BASE_URL}/#{date}?base=#{from.code}")
+        raise "Only conversions to PLN are supported" if to.code != 'PLN'
+
+        url = URI("#{BASE_URL}/exchangerates/rates/a/#{from.code}/#{date - 1}/?format=json")
         response = Net::HTTP.get_response(url)
 
         case response
         when Net::HTTPSuccess
           json = JSON.load(response.body)
-          rate = json['rates'][to.code.upcase]
-          raise NoDataException.new("No exchange rate found for #{to.code.upcase}") if rate.nil?
+          rate = json['rates'] && json['rates'][0] && json['rates'][0]['mid']
+          raise NoDataException.new("No exchange rate found for #{from.code.upcase}") if rate.nil?
 
           return rate
         when Net::HTTPBadRequest
