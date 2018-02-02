@@ -29,7 +29,7 @@ module CoinSync
         currency = tx.fiat_currency.code
         tx_type = tx.type.to_s
 
-        [
+        csv = [
           tx.number || 0,
           tx.exchange,
           @labels[tx_type] || tx_type.capitalize,
@@ -40,6 +40,16 @@ module CoinSync
           format_float(total / amount, 4),
           currency
         ]
+
+        if tx.converted
+          csv += [
+            format_float(tx.converted.fiat_amount, 4),
+            format_float(tx.converted.fiat_amount / amount, 4),
+            tx.converted.fiat_currency.code
+          ]
+        end
+
+        csv
       end
 
       def format_float(value, prec)

@@ -21,17 +21,22 @@ when 'build'
 
   config = CoinSync::Config.load_from_file('config.yml')
   builder = CoinSync::Builder.new(config)
-  builder.build_transaction_list
+  transactions = builder.build_transaction_list
+
+  if config.convert_to_currency
+    converter = CoinSync::Outputs::CurrencyConverter.new(config)
+    converter.process_transactions(transactions)
+  end
 
   output = CoinSync::Outputs::Default.new(config, 'build/input.csv')
-  output.process_transactions(builder.transactions)
+  output.process_transactions(transactions)
 
 when 'summary'
   config = CoinSync::Config.load_from_file('config.yml')
   builder = CoinSync::Builder.new(config)
-  builder.build_transaction_list
+  transactions = builder.build_transaction_list
 
-  CoinSync::Outputs::Summary.new.process_transactions(builder.transactions)
+  CoinSync::Outputs::Summary.new.process_transactions(transactions)
 
 else
   raise "Unknown command #{command}"

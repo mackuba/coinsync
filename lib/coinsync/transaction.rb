@@ -6,8 +6,75 @@ module CoinSync
     TYPE_SALE = :sale
     TYPE_SWAP = :swap
 
-    attr_reader :number, :exchange, :bought_currency, :sold_currency, :time, :bought_amount, :sold_amount
-    attr_writer :number
+    module Amounts
+      attr_reader :bought_currency, :sold_currency, :bought_amount, :sold_amount
+
+      def type
+        if bought_currency.is_a?(CryptoCurrency)
+          if sold_currency.is_a?(CryptoCurrency)
+            return TYPE_SWAP
+          else
+            return TYPE_PURCHASE
+          end
+        else
+          return TYPE_SALE
+        end
+      end
+
+      def purchase?
+        type == TYPE_PURCHASE
+      end
+
+      def sale?
+        type == TYPE_SALE
+      end
+
+      def swap?
+        type == TYPE_SWAP
+      end
+
+      def fiat_amount
+        case type
+        when TYPE_PURCHASE then sold_amount
+        when TYPE_SALE then bought_amount
+        else raise "Operation not supported for crypto swap transactions"
+        end
+      end
+
+      def crypto_amount
+        case type
+        when TYPE_PURCHASE then bought_amount
+        when TYPE_SALE then sold_amount
+        else raise "Operation not supported for crypto swap transactions"
+        end
+      end
+
+      def fiat_currency
+        case type
+        when TYPE_PURCHASE then sold_currency
+        when TYPE_SALE then bought_currency
+        else raise "Operation not supported for crypto swap transactions"
+        end
+      end
+
+      def crypto_currency
+        case type
+        when TYPE_PURCHASE then bought_currency
+        when TYPE_SALE then sold_currency
+        else raise "Operation not supported for crypto swap transactions"
+        end
+      end
+    end
+
+    class ConvertedAmounts
+      include Amounts
+      attr_writer :bought_currency, :sold_currency, :bought_amount, :sold_amount
+    end
+
+    attr_reader :exchange, :time
+    attr_accessor :number, :converted
+
+    include Amounts
 
     def initialize(number: nil, exchange:, bought_currency:, sold_currency:, time:, bought_amount:, sold_amount:)
       if number.nil? || number.is_a?(Integer)
@@ -51,62 +118,6 @@ module CoinSync
       end
 
       (sold_amount > 0) or raise "Transaction: sold_amount should be positive (#{sold_amount})"
-    end
-
-    def type
-      if bought_currency.is_a?(CryptoCurrency)
-        if sold_currency.is_a?(CryptoCurrency)
-          return TYPE_SWAP
-        else
-          return TYPE_PURCHASE
-        end
-      else
-        return TYPE_SALE
-      end
-    end
-
-    def purchase?
-      type == TYPE_PURCHASE
-    end
-
-    def sale?
-      type == TYPE_SALE
-    end
-
-    def swap?
-      type == TYPE_SWAP
-    end
-
-    def fiat_amount
-      case type
-      when TYPE_PURCHASE then sold_amount
-      when TYPE_SALE then bought_amount
-      else raise "Operation not supported for crypto swap transactions"
-      end
-    end
-
-    def crypto_amount
-      case type
-      when TYPE_PURCHASE then bought_amount
-      when TYPE_SALE then sold_amount
-      else raise "Operation not supported for crypto swap transactions"
-      end
-    end
-
-    def fiat_currency
-      case type
-      when TYPE_PURCHASE then sold_currency
-      when TYPE_SALE then bought_currency
-      else raise "Operation not supported for crypto swap transactions"
-      end
-    end
-
-    def crypto_currency
-      case type
-      when TYPE_PURCHASE then bought_currency
-      when TYPE_SALE then sold_currency
-      else raise "Operation not supported for crypto swap transactions"
-      end
     end
   end
 end

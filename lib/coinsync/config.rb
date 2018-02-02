@@ -21,6 +21,10 @@ module CoinSync
       settings['decimal_separator']
     end
 
+    def convert_to_currency
+      settings['convert_to'] ? FiatCurrency.new(settings['convert_to']) : nil
+    end
+
     def self.load_from_file(filename)
       yaml = YAML.load(File.read(filename))
       self.new(yaml)
