@@ -2,6 +2,8 @@ Dir[File.join(File.dirname(__FILE__), 'importers', '*.rb')].each { |f| load(f) }
 
 module CoinSync
   class Builder
+    attr_reader :transactions
+
     def initialize(config)
       @config = config
 
@@ -14,7 +16,7 @@ module CoinSync
       }
     end
 
-    def build(filename, &block)
+    def build_transaction_list
       transactions = []
 
       @config.sources.each do |key, params|
@@ -25,17 +27,8 @@ module CoinSync
         end
       end
 
-      if block.nil?
-        formatter = Importers::Default.new(@config)
-        block = proc { |tx, csv| csv << formatter.save_to_csv(tx) }
-      end
-
-      CSV.open(filename, 'w', col_sep: @config.column_separator) do |csv|
-        transactions.sort_by { |tx| tx.time }.each_with_index do |tx, i|
-          tx.number = i + 1
-          block.call(tx, csv)
-        end
-      end
+      @transactions = transactions.sort_by { |tx| tx.time }
+      @transactions.each_with_index { |tx, i| tx.number = i + 1 }
     end
   end
 end
