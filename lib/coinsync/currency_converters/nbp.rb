@@ -15,13 +15,13 @@ module CoinSync
       def fetch_conversion_rate(from:, to:, date:)
         raise "Only conversions to PLN are supported" if to.code != 'PLN'
 
-        url = URI("#{BASE_URL}/exchangerates/rates/a/#{from.code}/#{date - 1}/?format=json")
+        url = URI("#{BASE_URL}/exchangerates/rates/a/#{from.code}/#{date - 8}/#{date - 1}/?format=json")
         response = Net::HTTP.get_response(url)
 
         case response
         when Net::HTTPSuccess
           json = JSON.load(response.body)
-          rate = json['rates'] && json['rates'][0] && json['rates'][0]['mid']
+          rate = json['rates'] && json['rates'].last && json['rates'].last['mid']
           raise NoDataException.new("No exchange rate found for #{from.code.upcase}") if rate.nil?
 
           return rate
