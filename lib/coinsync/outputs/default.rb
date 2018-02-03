@@ -53,7 +53,7 @@ module CoinSync
       end
 
       def format_float(value, prec)
-        s = sprintf("%.#{prec}f", value)
+        s = sprintf("%.#{prec}f", value).gsub(/0+$/, '').gsub(/\.$/, '')
         s.gsub!(/\./, @decimal_separator) if @decimal_separator
         s
       end
