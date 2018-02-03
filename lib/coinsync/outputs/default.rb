@@ -63,12 +63,20 @@ module CoinSync
           format_float(total / amount, 4)
         ]
 
-        if tx.converted
-          csv += [
-            format_float(tx.converted.fiat_amount, 4),
-            format_float(tx.converted.fiat_amount / amount, 4),
-            format_float(tx.converted.exchange_rate, 4)
-          ]
+        if currency = @config.convert_to_currency
+          if tx.converted
+            csv += [
+              format_float(tx.converted.fiat_amount, 4),
+              format_float(tx.converted.fiat_amount / amount, 4),
+              format_float(tx.converted.exchange_rate, 4)
+            ]
+          else
+            csv += [
+              format_float(tx.fiat_amount, 4),
+              format_float(tx.fiat_amount / amount, 4),
+              nil
+            ]
+          end
         end
 
         csv
