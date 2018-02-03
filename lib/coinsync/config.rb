@@ -29,6 +29,10 @@ module CoinSync
       settings['convert_with']&.to_sym
     end
 
+    def time_format
+      settings['time_format']
+    end
+
     def self.load_from_file(filename)
       yaml = YAML.load(File.read(filename))
       self.new(yaml)

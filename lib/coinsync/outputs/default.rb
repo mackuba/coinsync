@@ -88,7 +88,7 @@ module CoinSync
       end
 
       def format_time(time)
-        time.strftime('%Y-%m-%d %H:%M:%S')
+        time.strftime(@config.time_format || '%Y-%m-%d %H:%M:%S')
       end
     end
   end
