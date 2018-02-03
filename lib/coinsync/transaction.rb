@@ -99,7 +99,7 @@ module CoinSync
       end
 
       if time.is_a?(Time)
-        @time = time
+        @time = time.getlocal
       else
         raise "Transaction: '#{time}' is not a valid Time object"
       end
