@@ -12,7 +12,7 @@ module CoinSync
           :to_amount, :to_currency, :status
 
         def initialize(line)
-          @date = Time.parse(line[0])
+          @date = Time.strptime(line[0], '%a %b %d %Y %H:%M:%S GMT+0000 (%Z)')
           @id = line[1]
           @type = line[2]
           @from_account = line[3]
