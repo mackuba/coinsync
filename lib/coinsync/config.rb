@@ -4,9 +4,15 @@ module CoinSync
   class Config
     attr_reader :sources, :settings
 
+    def self.load_from_file(filename)
+      yaml = YAML.load(File.read(filename))
+      self.new(yaml)
+    end
+
     def initialize(yaml)
       @sources = yaml['sources'] or raise 'Config: No sources listed'
       @settings = yaml['settings'] || {}
+      @labels = @settings['labels'] || {}
     end
 
     def column_separator
@@ -33,9 +39,8 @@ module CoinSync
       settings['time_format']
     end
 
-    def self.load_from_file(filename)
-      yaml = YAML.load(File.read(filename))
-      self.new(yaml)
+    def translate(label)
+      @labels[label] || label
     end
   end
 end 

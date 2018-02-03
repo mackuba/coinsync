@@ -6,7 +6,6 @@ module CoinSync
       def initialize(config, target_file)
         @config = config
         @target_file = target_file
-        @labels = config.settings['labels'] || {}
         @decimal_separator = config.custom_decimal_separator
       end
 
@@ -33,21 +32,17 @@ module CoinSync
           'Total value',
           'Price',
           'Currency'
-        ].map { |l| translate(l) }
+        ].map { |l| @config.translate(l) }
 
         if currency = @config.convert_to_currency
           line += [
-            translate('Total value ($CURRENCY)').gsub('$CURRENCY', currency.code),
-            translate('Price ($CURRENCY)').gsub('$CURRENCY', currency.code),
-            translate('Exchange rate')
+            @config.translate('Total value ($CURRENCY)').gsub('$CURRENCY', currency.code),
+            @config.translate('Price ($CURRENCY)').gsub('$CURRENCY', currency.code),
+            @config.translate('Exchange rate')
           ]
         end
 
         line
-      end
-
-      def translate(label)
-        @labels[label] || label
       end
 
       def transaction_to_csv(tx)
@@ -62,7 +57,7 @@ module CoinSync
         csv = [
           tx.number || 0,
           tx.exchange,
-          translate(tx_type),
+          @config.translate(tx_type),
           format_time(tx.time),
           format_float(amount, 8),
           asset,
