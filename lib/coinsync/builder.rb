@@ -27,7 +27,9 @@ module CoinSync
         end
       end
 
-      @transactions = transactions.sort_by { |tx| tx.time }
+      transactions.each_with_index { |tx, i| tx.number = i + 1 }
+
+      @transactions = transactions.sort_by { |tx| [tx.time, tx.number] }
       @transactions.each_with_index { |tx, i| tx.number = i + 1 }
     end
   end
