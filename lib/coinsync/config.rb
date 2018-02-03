@@ -25,6 +25,10 @@ module CoinSync
       settings['convert_to'] ? FiatCurrency.new(settings['convert_to']) : nil
     end
 
+    def currency_converter
+      settings['convert_with']&.to_sym
+    end
+
     def self.load_from_file(filename)
       yaml = YAML.load(File.read(filename))
       self.new(yaml)

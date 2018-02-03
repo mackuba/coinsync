@@ -10,7 +10,13 @@ module CoinSync
     class CurrencyConverter
       def initialize(config)
         @config = config
-        @converter = CurrencyConverters::Fixer.new
+
+        @converter = case config.currency_converter || :fixer
+        when :fixer then CurrencyConverters::Fixer.new
+        when :nbp then CurrencyConverters::NBP.new
+        else raise "Unknown currency converter #{config.currency_converter}"
+        end
+
         @target_currency = config.convert_to_currency
       end
 
