@@ -12,6 +12,8 @@ module CoinSync
 
       def process_transactions(transactions)
         CSV.open(@target_file, 'w', col_sep: @config.column_separator) do |csv|
+          csv << headers(transactions)
+
           transactions.each do |tx|
             csv << transaction_to_csv(tx)
           end
@@ -19,6 +21,29 @@ module CoinSync
       end
 
       private
+
+      def headers(transactions)
+        line = [
+          'No.',
+          'Exchange',
+          'Type',
+          'Date',
+          'Amount',
+          'Asset',
+          'Total value',
+          'Price',
+          'Currency'
+        ]
+
+        if currency = @config.convert_to_currency
+          line += [
+            "Total value (#{currency.code})",
+            "Price (#{currency.code})"
+          ]
+        end
+
+        line
+      end
 
       def transaction_to_csv(tx)
         raise "Currently unsupported" if tx.swap?
@@ -37,8 +62,7 @@ module CoinSync
           format_float(amount, 8),
           asset,
           format_float(total, 4),
-          format_float(total / amount, 4),
-          currency
+          format_float(total / amount, 4)
         ]
 
         if tx.converted
