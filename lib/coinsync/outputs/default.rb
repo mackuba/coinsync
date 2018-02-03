@@ -63,7 +63,7 @@ module CoinSync
           tx.number || 0,
           tx.exchange,
           translate(tx_type),
-          tx.time,
+          format_time(tx.time),
           format_float(amount, 8),
           asset,
           format_float(total, 4),
@@ -85,6 +85,10 @@ module CoinSync
         s = sprintf("%.#{prec}f", value).gsub(/0+$/, '').gsub(/\.$/, '')
         s.gsub!(/\./, @decimal_separator) if @decimal_separator
         s
+      end
+
+      def format_time(time)
+        time.strftime('%Y-%m-%d %H:%M:%S')
       end
     end
   end
