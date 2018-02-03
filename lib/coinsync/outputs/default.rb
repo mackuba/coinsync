@@ -19,8 +19,6 @@ module CoinSync
         end
       end
 
-      private
-
       def headers(transactions)
         line = [
           'No.',
