@@ -62,7 +62,8 @@ module CoinSync
           @formatter.format_crypto(amount),
           asset,
           @formatter.format_fiat(total),
-          @formatter.format_fiat(total / amount)
+          @formatter.format_fiat(total / amount),
+          currency
         ]
 
         if currency = @config.convert_to_currency
