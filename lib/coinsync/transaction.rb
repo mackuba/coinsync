@@ -69,6 +69,7 @@ module CoinSync
     class ConvertedAmounts
       include Amounts
       attr_writer :bought_currency, :sold_currency, :bought_amount, :sold_amount
+      attr_accessor :exchange_rate
     end
 
     attr_reader :exchange, :time

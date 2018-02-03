@@ -38,7 +38,8 @@ module CoinSync
         if currency = @config.convert_to_currency
           line += [
             translate('Total value ($CURRENCY)').gsub('$CURRENCY', currency.code),
-            translate('Price ($CURRENCY)').gsub('$CURRENCY', currency.code)
+            translate('Price ($CURRENCY)').gsub('$CURRENCY', currency.code),
+            translate('Exchange rate')
           ]
         end
 
@@ -72,7 +73,8 @@ module CoinSync
         if tx.converted
           csv += [
             format_float(tx.converted.fiat_amount, 4),
-            format_float(tx.converted.fiat_amount / amount, 4)
+            format_float(tx.converted.fiat_amount / amount, 4),
+            format_float(tx.converted.exchange_rate, 4)
           ]
         end
 
