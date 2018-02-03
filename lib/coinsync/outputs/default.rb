@@ -33,16 +33,20 @@ module CoinSync
           'Total value',
           'Price',
           'Currency'
-        ]
+        ].map { |l| translate(l) }
 
         if currency = @config.convert_to_currency
           line += [
-            "Total value (#{currency.code})",
-            "Price (#{currency.code})"
+            translate('Total value ($CURRENCY)').gsub('$CURRENCY', currency.code),
+            translate('Price ($CURRENCY)').gsub('$CURRENCY', currency.code)
           ]
         end
 
         line
+      end
+
+      def translate(label)
+        @labels[label] || label
       end
 
       def transaction_to_csv(tx)
@@ -52,12 +56,12 @@ module CoinSync
         total = tx.fiat_amount
         asset = tx.crypto_currency.code
         currency = tx.fiat_currency.code
-        tx_type = tx.type.to_s
+        tx_type = tx.type.to_s.capitalize
 
         csv = [
           tx.number || 0,
           tx.exchange,
-          @labels[tx_type] || tx_type.capitalize,
+          translate(tx_type),
           tx.time,
           format_float(amount, 8),
           asset,
@@ -68,8 +72,7 @@ module CoinSync
         if tx.converted
           csv += [
             format_float(tx.converted.fiat_amount, 4),
-            format_float(tx.converted.fiat_amount / amount, 4),
-            tx.converted.fiat_currency.code
+            format_float(tx.converted.fiat_amount / amount, 4)
           ]
         end
 
