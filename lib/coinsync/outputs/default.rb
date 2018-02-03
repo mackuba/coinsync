@@ -1,12 +1,14 @@
 require 'csv'
 
+require_relative '../number_formatter'
+
 module CoinSync
   module Outputs
     class Default
       def initialize(config, target_file)
         @config = config
         @target_file = target_file
-        @decimal_separator = config.custom_decimal_separator
+        @formatter = NumberFormatter.new(config)
       end
 
       def process_transactions(transactions)
@@ -57,35 +59,29 @@ module CoinSync
           tx.exchange,
           @config.translate(tx_type),
           format_time(tx.time),
-          format_float(amount, 8),
+          @formatter.format_crypto(amount),
           asset,
-          format_float(total, 4),
-          format_float(total / amount, 4)
+          @formatter.format_fiat(total),
+          @formatter.format_fiat(total / amount)
         ]
 
         if currency = @config.convert_to_currency
           if tx.converted
             csv += [
-              format_float(tx.converted.fiat_amount, 4),
-              format_float(tx.converted.fiat_amount / amount, 4),
-              format_float(tx.converted.exchange_rate, 4)
+              @formatter.format_fiat(tx.converted.fiat_amount),
+              @formatter.format_fiat(tx.converted.fiat_amount / amount),
+              @formatter.format_fiat(tx.converted.exchange_rate)
             ]
           else
             csv += [
-              format_float(tx.fiat_amount, 4),
-              format_float(tx.fiat_amount / amount, 4),
+              @formatter.format_fiat(tx.fiat_amount),
+              @formatter.format_fiat(tx.fiat_amount / amount),
               nil
             ]
           end
         end
 
         csv
-      end
-
-      def format_float(value, prec)
-        s = sprintf("%.#{prec}f", value).gsub(/0+$/, '').gsub(/\.$/, '')
-        s.gsub!(/\./, @decimal_separator) if @decimal_separator
-        s
       end
 
       def format_time(time)
