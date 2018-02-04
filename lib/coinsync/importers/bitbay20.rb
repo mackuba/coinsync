@@ -132,7 +132,7 @@ module CoinSync
           end
         end
 
-        transactions
+        transactions.reverse
       end
     end
   end
