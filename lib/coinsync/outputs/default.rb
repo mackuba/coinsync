@@ -71,7 +71,7 @@ module CoinSync
             csv += [
               @formatter.format_fiat(tx.converted.fiat_amount),
               @formatter.format_fiat(tx.converted.fiat_amount / amount),
-              @formatter.format_fiat(tx.converted.exchange_rate)
+              @formatter.format_float(tx.converted.exchange_rate, precision: 4)
             ]
           else
             csv += [
