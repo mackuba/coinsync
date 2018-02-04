@@ -11,6 +11,7 @@ module CoinSync
         attr_accessor :lp, :type, :date, :market, :amount, :price, :total, :fee, :fee_currency, :id
 
         def initialize(line)
+          # TODO: force parsing in Polish timezone
           @lp = line[0].to_i
           @type = line[1]
           @date = Time.parse(line[2])

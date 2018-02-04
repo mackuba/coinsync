@@ -21,6 +21,7 @@ module CoinSync
         attr_accessor :date, :accounting_date, :type, :amount, :currency
 
         def initialize(line)
+          # TODO: force parsing in Polish timezone
           @date = Time.parse(line[0]) unless line[0] == '-'
           @accounting_date = Time.parse(line[1]) unless line[1] == '-'
           @type = line[2]
