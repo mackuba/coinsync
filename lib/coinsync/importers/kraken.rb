@@ -13,7 +13,7 @@ module CoinSync
         def initialize(line)
           @txid = line[0]
           @refid = line[1]
-          @time = Time.parse(line[2])
+          @time = Time.parse(line[2] + " +0000")
           @type = line[3]
           @aclass = line[4]
           @asset = parse_currency(line[5])
