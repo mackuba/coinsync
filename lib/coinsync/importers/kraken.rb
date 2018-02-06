@@ -24,8 +24,15 @@ module CoinSync
 
         def parse_currency(code)
           case code
+          when 'BCH' then CryptoCurrency.new('BCH')
+          when 'XETC' then CryptoCurrency.new('ETC')
+          when 'XETH' then CryptoCurrency.new('ETH')
+          when 'XICN' then CryptoCurrency.new('ICN')
+          when 'XLTC' then CryptoCurrency.new('LTC')
           when 'XXBT' then CryptoCurrency.new('BTC')
           when 'XXLM' then CryptoCurrency.new('XLM')
+          when 'XXMR' then CryptoCurrency.new('XMR')
+          when 'XXRP' then CryptoCurrency.new('XRP')
           when 'ZEUR' then FiatCurrency.new('EUR')
           when 'ZUSD' then FiatCurrency.new('USD')
           else raise "Unknown currency: #{code}"
