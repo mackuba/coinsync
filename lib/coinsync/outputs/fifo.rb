@@ -1,6 +1,6 @@
 require 'csv'
 
-require_relative '../number_formatter'
+require_relative '../formatter'
 require_relative '../transaction'
 
 module CoinSync
@@ -26,7 +26,7 @@ module CoinSync
       def initialize(config, target_file)
         @config = config
         @target_file = target_file
-        @formatter = NumberFormatter.new(config)
+        @formatter = Formatter.new(config)
       end
 
       def process_transactions(transactions)
@@ -145,7 +145,7 @@ module CoinSync
           tx.number,
           tx.exchange,
           @config.translate(tx_type),
-          format_time(tx.time),
+          @formatter.format_time(tx.time),
           @formatter.format_crypto(tx.crypto_amount),
           asset,
           @formatter.format_fiat(tx.fiat_amount),
@@ -213,10 +213,6 @@ module CoinSync
 
       def converted(transaction)
         transaction.converted || transaction
-      end
-
-      def format_time(time)
-        time.strftime(@config.time_format || '%Y-%m-%d %H:%M:%S')
       end
     end
   end

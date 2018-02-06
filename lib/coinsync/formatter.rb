@@ -1,5 +1,5 @@
 module CoinSync
-  class NumberFormatter
+  class Formatter
     def initialize(config)
       @config = config
       @decimal_separator = config.custom_decimal_separator
@@ -18,6 +18,10 @@ module CoinSync
 
     def format_crypto(amount)
       format_float(amount, precision: 8, remove_trailing_zeros: true)
+    end
+
+    def format_time(time)
+      time.strftime(@config.time_format || '%Y-%m-%d %H:%M:%S')
     end
   end
 end
