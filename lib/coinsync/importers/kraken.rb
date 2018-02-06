@@ -69,8 +69,12 @@ module CoinSync
           fiat = [matching, entry].detect { |e| !e.crypto? }
           crypto = [matching, entry].detect { |e| e.crypto? }
 
-          if fiat.nil? || crypto.nil?
+          if crypto.nil?
             raise "Kraken importer error: Couldn't match a pair of ledger lines"
+          elsif fiat.nil?
+            # skip for now
+            matching = nil
+            next
           end
 
           if crypto.amount > 0
