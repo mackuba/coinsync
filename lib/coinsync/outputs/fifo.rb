@@ -154,7 +154,7 @@ module CoinSync
           @formatter.format_crypto(tx.crypto_amount),
           asset,
           @formatter.format_fiat(tx.fiat_amount),
-          @formatter.format_fiat(tx.price),
+          @formatter.format_fiat_price(tx.price),
           currency
         ]
 
@@ -162,13 +162,13 @@ module CoinSync
           if tx.converted
             csv += [
               @formatter.format_fiat(tx.converted.fiat_amount),
-              @formatter.format_fiat(tx.converted.price),
+              @formatter.format_fiat_price(tx.converted.price),
               @formatter.format_float(tx.converted.exchange_rate, precision: 4)
             ]
           else
             csv += [
               @formatter.format_fiat(tx.fiat_amount),
-              @formatter.format_fiat(tx.price),
+              @formatter.format_fiat_price(tx.price),
               nil
             ]
           end
@@ -181,7 +181,7 @@ module CoinSync
 
           csv += [
             input.number,
-            @formatter.format_fiat(purchase_price),
+            @formatter.format_fiat_price(purchase_price),
             @formatter.format_fiat(total_cost),
             @formatter.format_fiat(total_gain),
             @formatter.format_fiat(total_gain - total_cost)

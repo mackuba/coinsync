@@ -16,6 +16,10 @@ module CoinSync
       format_float(amount, precision: 2)
     end
 
+    def format_fiat_price(amount)
+      format_float(amount, precision: (amount < 10 ? 4 : 2))
+    end
+
     def format_crypto(amount)
       format_float(amount, precision: 8, remove_trailing_zeros: true)
     end
