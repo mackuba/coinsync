@@ -1,6 +1,7 @@
 require 'csv'
 
 require_relative '../formatter'
+require_relative '../table_printer'
 require_relative '../transaction'
 
 module CoinSync
@@ -187,8 +188,8 @@ module CoinSync
       end
 
       def print_year_stats(years)
+        header = ['Year', 'Cost', 'Gain', 'Profit']
         rows = []
-        rows << ['Year', 'Cost', 'Gain', 'Profit']
 
         years.keys.sort.each do |year|
           gain, cost = years[year]
@@ -200,15 +201,8 @@ module CoinSync
           ]
         end
 
-        widths = (0..3).map { |c| rows.map { |r| r[c].length }.max }
-        space = '    '
-
-        puts (0..3).map { |c| rows[0][c].center(widths[c]) }.join(space)
-        puts '-' * (widths.inject(&:+) + space.length * 3)
-
-        rows[1..-1].each do |row|
-          puts (0..3).map { |c| row[c].send(c == 0 ? 'ljust' : 'rjust', widths[c]) }.join(space)
-        end
+        printer = TablePrinter.new
+        printer.print_table(header, rows, alignment: [:ljust, :rjust, :rjust, :rjust], separator: '    ')
       end
 
       def converted(transaction)
