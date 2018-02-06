@@ -74,6 +74,11 @@ module CoinSync
           raise "Error: input is nil for #{sale.to_line}"
         end
 
+        if converted(sale).bought_currency != converted(input).sold_currency
+          raise "Error: currencies don't match: bought with #{input.sold_currency.code}, " +
+            "sold with #{sale.bought_currency.code}. Use `convert_to` option if multiple fiat currencies were used."
+        end
+
         amount = [input.amount_left, sale.amount_left].min
 
         input.sell(amount)
