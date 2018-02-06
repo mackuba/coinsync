@@ -64,6 +64,10 @@ module CoinSync
         else raise "Operation not supported for crypto swap transactions"
         end
       end
+
+      def price
+        fiat_amount / crypto_amount
+      end
     end
 
     class ConvertedAmounts

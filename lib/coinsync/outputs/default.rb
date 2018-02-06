@@ -48,8 +48,6 @@ module CoinSync
       def transaction_to_csv(tx)
         raise "Currently unsupported" if tx.swap?
 
-        amount = tx.crypto_amount
-        total = tx.fiat_amount
         asset = tx.crypto_currency.code
         currency = tx.fiat_currency.code
         tx_type = tx.type.to_s.capitalize
@@ -59,10 +57,10 @@ module CoinSync
           tx.exchange,
           @config.translate(tx_type),
           format_time(tx.time),
-          @formatter.format_crypto(amount),
+          @formatter.format_crypto(tx.crypto_amount),
           asset,
-          @formatter.format_fiat(total),
-          @formatter.format_fiat(total / amount),
+          @formatter.format_fiat(tx.fiat_amount),
+          @formatter.format_fiat(tx.price),
           currency
         ]
 
@@ -70,13 +68,13 @@ module CoinSync
           if tx.converted
             csv += [
               @formatter.format_fiat(tx.converted.fiat_amount),
-              @formatter.format_fiat(tx.converted.fiat_amount / amount),
+              @formatter.format_fiat(tx.converted.price),
               @formatter.format_float(tx.converted.exchange_rate, precision: 4)
             ]
           else
             csv += [
               @formatter.format_fiat(tx.fiat_amount),
-              @formatter.format_fiat(tx.fiat_amount / amount),
+              @formatter.format_fiat(tx.price),
               nil
             ]
           end
