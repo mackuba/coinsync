@@ -30,6 +30,8 @@ module CoinSync
       end
 
       def process_transactions(transactions)
+        years = {}
+
         CSV.open(@target_file, 'w', col_sep: @config.column_separator) do |csv|
           inputs = []
 
@@ -44,15 +46,26 @@ module CoinSync
               current_sale = TransactionFragment.new(tx)
 
               while current_sale.amount_left > 0
-                partial_sale = sell_input(inputs.first, current_sale)
-                csv << transaction_to_csv(partial_sale, inputs.first.transaction)
-                inputs.shift if inputs.first.amount_left == 0
+                input = inputs.first
+
+                partial_sale = sell_input(input, current_sale)
+                csv << transaction_to_csv(partial_sale, input.transaction)
+                inputs.shift if input.amount_left == 0
+
+                total_cost = converted(input).price * partial_sale.crypto_amount
+                total_gain = converted(partial_sale).fiat_amount
+
+                years[tx.time.year] ||= [0.0, 0.0]
+                years[tx.time.year][0] += total_gain
+                years[tx.time.year][1] += total_cost
               end
             else
               raise "Fifo: transaction type not currently supported"
             end
           end
         end
+
+        print_year_stats(years)
       end
 
       def sell_input(input, sale)
@@ -157,13 +170,13 @@ module CoinSync
         end
 
         if input
-          price = input.converted&.price || input.price
-          total_cost = price * tx.crypto_amount
-          total_gain = tx.converted&.fiat_amount || tx.fiat_amount
+          purchase_price = converted(input).price
+          total_cost = purchase_price * tx.crypto_amount
+          total_gain = converted(tx).fiat_amount
 
           csv += [
             input.number,
-            @formatter.format_fiat(price),
+            @formatter.format_fiat(purchase_price),
             @formatter.format_fiat(total_cost),
             @formatter.format_fiat(total_gain),
             @formatter.format_fiat(total_gain - total_cost)
@@ -171,6 +184,35 @@ module CoinSync
         end
 
         csv
+      end
+
+      def print_year_stats(years)
+        rows = []
+        rows << ['Year', 'Cost', 'Gain', 'Profit']
+
+        years.keys.sort.each do |year|
+          gain, cost = years[year]
+          rows << [
+            year.to_s,
+            @formatter.format_fiat(cost),
+            @formatter.format_fiat(gain),
+            @formatter.format_fiat(gain - cost)
+          ]
+        end
+
+        widths = (0..3).map { |c| rows.map { |r| r[c].length }.max }
+        space = '    '
+
+        puts (0..3).map { |c| rows[0][c].center(widths[c]) }.join(space)
+        puts '-' * (widths.inject(&:+) + space.length * 3)
+
+        rows[1..-1].each do |row|
+          puts (0..3).map { |c| row[c].send(c == 0 ? 'ljust' : 'rjust', widths[c]) }.join(space)
+        end
+      end
+
+      def converted(transaction)
+        transaction.converted || transaction
       end
 
       def format_time(time)
