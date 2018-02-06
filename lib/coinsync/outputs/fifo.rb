@@ -34,24 +34,27 @@ module CoinSync
         years = {}
 
         CSV.open(@target_file, 'w', col_sep: @config.column_separator) do |csv|
-          inputs = []
+          inputs = {}
 
           csv << headers
 
           transactions.each do |tx|
             case tx.type
             when Transaction::TYPE_PURCHASE
-              inputs << TransactionFragment.new(tx)
+              inputs[tx.bought_currency] ||= []
+              inputs[tx.bought_currency] << TransactionFragment.new(tx)
               csv << transaction_to_csv(tx)
             when Transaction::TYPE_SALE
               current_sale = TransactionFragment.new(tx)
+              inputs[tx.sold_currency] ||= []
 
               while current_sale.amount_left > 0
-                input = inputs.first
+                input = inputs[tx.sold_currency].first
+                raise "Error: no inputs left to sell for #{tx.sold_currency.code}" if input.nil?
 
                 partial_sale = sell_input(input, current_sale)
                 csv << transaction_to_csv(partial_sale, input.transaction)
-                inputs.shift if input.amount_left == 0
+                inputs[tx.sold_currency].shift if input.amount_left == 0
 
                 total_cost = converted(input).price * partial_sale.crypto_amount
                 total_gain = converted(partial_sale).fiat_amount
@@ -70,10 +73,6 @@ module CoinSync
       end
 
       def sell_input(input, sale)
-        if input.nil?
-          raise "Error: input is nil for #{sale.to_line}"
-        end
-
         if converted(sale).bought_currency != converted(input).sold_currency
           raise "Error: currencies don't match: bought with #{input.sold_currency.code}, " +
             "sold with #{sale.bought_currency.code}. Use `convert_to` option if multiple fiat currencies were used."
