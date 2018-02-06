@@ -13,7 +13,7 @@ module CoinSync
 
       def process_transactions(transactions)
         CSV.open(@target_file, 'w', col_sep: @config.column_separator) do |csv|
-          csv << headers(transactions)
+          csv << headers
 
           transactions.each do |tx|
             csv << transaction_to_csv(tx)
@@ -21,7 +21,7 @@ module CoinSync
         end
       end
 
-      def headers(transactions)
+      def headers
         line = [
           'No.',
           'Exchange',
@@ -64,7 +64,7 @@ module CoinSync
           currency
         ]
 
-        if currency = @config.convert_to_currency
+        if @config.convert_to_currency
           if tx.converted
             csv += [
               @formatter.format_fiat(tx.converted.fiat_amount),
