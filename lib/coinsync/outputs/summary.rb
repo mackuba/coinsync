@@ -1,8 +1,14 @@
 require_relative '../currencies'
+require_relative '../formatter'
 
 module CoinSync
   module Outputs
     class Summary
+      def initialize(config)
+        @config = config
+        @formatter = Formatter.new(@config)
+      end
+
       def process_transactions(transactions)
         totals = Hash.new(0)
 
@@ -25,7 +31,7 @@ module CoinSync
         max_len = totals.keys.map(&:code).map(&:length).max
 
         totals.each do |currency, amount|
-          puts (currency.code + ":").ljust(max_len + 1) + "  #{amount}"
+          puts (currency.code + ":").ljust(max_len + 1) + '  ' + @formatter.format_crypto(amount)
         end
       end
     end

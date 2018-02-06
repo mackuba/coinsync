@@ -36,7 +36,7 @@ when 'summary'
   builder = CoinSync::Builder.new(config)
   transactions = builder.build_transaction_list
 
-  CoinSync::Outputs::Summary.new.process_transactions(transactions)
+  CoinSync::Outputs::Summary.new(config).process_transactions(transactions)
 
 when 'fifo'
   FileUtils.mkdir_p 'build'
