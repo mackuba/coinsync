@@ -55,6 +55,18 @@ module CoinSync
 
           entry = LedgerEntry.new(line)
 
+          if entry.type == 'transfer'
+            transactions << Transaction.new(
+              exchange: 'Kraken',
+              time: entry.time,
+              bought_amount: entry.amount,
+              bought_currency: entry.asset,
+              sold_amount: 0.0,
+              sold_currency: FiatCurrency.new(nil)
+            )
+            next
+          end
+
           next if entry.type != 'trade'
 
           if matching.nil?

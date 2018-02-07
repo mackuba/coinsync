@@ -38,16 +38,22 @@ module CoinSync
             tx.converted.sold_amount = tx.sold_amount
           elsif tx.sold_currency.fiat? && tx.sold_currency != @target_currency
             tx.converted = Transaction::ConvertedAmounts.new
-            tx.converted.sold_currency = @target_currency
-            tx.converted.exchange_rate = @converter.convert(
-              1.0,
-              from: tx.sold_currency,
-              to: @target_currency,
-              date: tx.time.to_date
-            )
-            tx.converted.sold_amount = tx.sold_amount * tx.converted.exchange_rate
             tx.converted.bought_currency = tx.bought_currency
             tx.converted.bought_amount = tx.bought_amount
+            tx.converted.sold_currency = @target_currency
+
+            if tx.sold_currency.code
+              tx.converted.exchange_rate = @converter.convert(
+                1.0,
+                from: tx.sold_currency,
+                to: @target_currency,
+                date: tx.time.to_date
+              )
+              tx.converted.sold_amount = tx.sold_amount * tx.converted.exchange_rate
+            else
+              tx.converted.exchange_rate = nil
+              tx.converted.sold_amount = 0.0
+            end
           end
         end
 

@@ -10,8 +10,8 @@ module CoinSync
       attr_reader :bought_currency, :sold_currency, :bought_amount, :sold_amount
 
       def type
-        if bought_currency.is_a?(CryptoCurrency)
-          if sold_currency.is_a?(CryptoCurrency)
+        if bought_currency.crypto?
+          if sold_currency.crypto?
             return TYPE_SWAP
           else
             return TYPE_PURCHASE
@@ -90,18 +90,6 @@ module CoinSync
 
       @exchange = exchange
 
-      if bought_currency.is_a?(Currency)
-        @bought_currency = bought_currency
-      else
-        raise "Transaction: '#{bought_currency}' is not a valid currency"
-      end
-
-      if sold_currency.is_a?(Currency)
-         @sold_currency = sold_currency
-      else
-        raise "Transaction: '#{sold_currency}' is not a valid currency"
-      end
-
       if time.is_a?(Time)
         @time = time.getlocal
       else
@@ -114,6 +102,12 @@ module CoinSync
         raise "Transaction: '#{bought_amount}' is not a number"
       end
 
+      if bought_currency.is_a?(Currency)
+        @bought_currency = bought_currency
+      else
+        raise "Transaction: '#{bought_currency}' is not a valid currency"
+      end
+
       (bought_amount > 0) or raise "Transaction: bought_amount should be positive (#{bought_amount})"
 
       if sold_amount.is_a?(Numeric)
@@ -122,7 +116,13 @@ module CoinSync
         raise "Transaction: '#{sold_amount}' is not a number"
       end
 
-      (sold_amount > 0) or raise "Transaction: sold_amount should be positive (#{sold_amount})"
+      if sold_currency.is_a?(Currency) || sold_amount == 0
+         @sold_currency = sold_currency
+      else
+        raise "Transaction: '#{sold_currency}' is not a valid currency"
+      end
+
+      (sold_amount >= 0) or raise "Transaction: sold_amount should not be negative (#{sold_amount})"
     end
   end
 end

@@ -155,7 +155,7 @@ module CoinSync
           asset,
           @formatter.format_fiat(tx.fiat_amount),
           @formatter.format_fiat_price(tx.price),
-          currency
+          currency || '–'
         ]
 
         if @config.convert_to_currency
@@ -163,7 +163,7 @@ module CoinSync
             csv += [
               @formatter.format_fiat(tx.converted.fiat_amount),
               @formatter.format_fiat_price(tx.converted.price),
-              @formatter.format_float(tx.converted.exchange_rate, precision: 4)
+              tx.converted.exchange_rate && @formatter.format_float(tx.converted.exchange_rate, precision: 4)
             ]
           else
             csv += [
