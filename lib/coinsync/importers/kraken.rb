@@ -47,7 +47,7 @@ module CoinSync
       def read_transaction_list(source)
         csv = CSV.new(source, col_sep: ',')
 
-        matching = nil
+        set = []
         transactions = []
 
         csv.each do |line|
@@ -69,49 +69,35 @@ module CoinSync
 
           next if entry.type != 'trade'
 
-          if matching.nil?
-            matching = entry
-            next
+          set << entry
+          next unless set.length == 2
+
+          if set[0].refid != set[1].refid
+            raise "Kraken importer error: Couldn't match a pair of ledger lines - ids don't match: #{set}"
           end
 
-          if matching.refid != entry.refid
-            raise "Kraken importer error: Couldn't match a pair of ledger lines"
+          if set.none? { |e| e.crypto? }
+            raise "Kraken importer error: Couldn't match a pair of ledger lines - " +
+              "no cryptocurrencies were exchanged: #{set}"
           end
 
-          fiat = [matching, entry].detect { |e| !e.crypto? }
-          crypto = [matching, entry].detect { |e| e.crypto? }
+          bought = set.detect { |e| e.amount > 0 }
+          sold = set.detect { |e| e.amount < 0 }
 
-          if crypto.nil?
-            raise "Kraken importer error: Couldn't match a pair of ledger lines"
-          elsif fiat.nil?
-            # skip for now
-            matching = nil
-            next
+          if bought.nil? || sold.nil?
+            raise "Kraken importer error: Couldn't match a pair of ledger lines - invalid transaction amounts: #{set}"
           end
 
-          if crypto.amount > 0
-            transactions << Transaction.new(
-              exchange: 'Kraken',
-              time: crypto.time,
-              bought_amount: crypto.amount - crypto.fee,
-              bought_currency: crypto.asset,
-              sold_amount: -(fiat.amount - fiat.fee),
-              sold_currency: fiat.asset
-            )
-          elsif crypto.amount < 0
-            transactions << Transaction.new(
-              exchange: 'Kraken',
-              time: crypto.time,
-              bought_amount: fiat.amount - fiat.fee,
-              bought_currency: fiat.asset,
-              sold_amount: -(crypto.amount - crypto.fee),
-              sold_currency: crypto.asset
-            )
-          else
-            raise "Kraken importer error: unexpected amount 0"
-          end
+          transactions << Transaction.new(
+            exchange: 'Kraken',
+            time: [bought.time, sold.time].max,
+            bought_amount: bought.amount - bought.fee,
+            bought_currency: bought.asset,
+            sold_amount: -(sold.amount - sold.fee),
+            sold_currency: sold.asset
+          )
 
-          matching = nil
+          set.clear
         end
 
         transactions
