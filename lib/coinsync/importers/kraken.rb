@@ -92,20 +92,20 @@ module CoinSync
           if crypto.amount > 0
             transactions << Transaction.new(
               exchange: 'Kraken',
-              bought_currency: crypto.asset,
-              sold_currency: fiat.asset,
               time: crypto.time,
               bought_amount: crypto.amount - crypto.fee,
-              sold_amount: -(fiat.amount - fiat.fee)
+              bought_currency: crypto.asset,
+              sold_amount: -(fiat.amount - fiat.fee),
+              sold_currency: fiat.asset
             )
           elsif crypto.amount < 0
             transactions << Transaction.new(
               exchange: 'Kraken',
-              bought_currency: fiat.asset,
-              sold_currency: crypto.asset,
               time: crypto.time,
               bought_amount: fiat.amount - fiat.fee,
-              sold_amount: -(crypto.amount - crypto.fee)
+              bought_currency: fiat.asset,
+              sold_amount: -(crypto.amount - crypto.fee),
+              sold_currency: crypto.asset
             )
           else
             raise "Kraken importer error: unexpected amount 0"
