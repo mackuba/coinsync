@@ -26,7 +26,8 @@ module CoinSync
             if amount >= tx.sold_amount
               totals[tx.sold_currency] = amount - tx.sold_amount
             else
-              raise "Summary: couldn't sell #{tx.sold_amount} #{tx.sold_currency.code} if only #{amount} was owned"
+              raise "Summary: couldn't sell #{@formatter.format_crypto(tx.sold_amount)} #{tx.sold_currency.code} " +
+                "if only #{@formatter.format_crypto(amount)} was owned"
             end
           end
         end

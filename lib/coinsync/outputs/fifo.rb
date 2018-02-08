@@ -19,7 +19,11 @@ module CoinSync
         end
 
         def sell(amount)
-          (amount <= @amount_left) or raise "TransactionFragment: cannot sell #{amount}, only #{@amount_left} left"
+          unless amount <= @amount_left
+            f = Formatter.new
+            raise "TransactionFragment: cannot sell #{f.format_crypto(amount)}, " +
+              "only #{f.format_crypto(@amount_left)} left"
+          end
 
           @amount_left -= amount
         end
