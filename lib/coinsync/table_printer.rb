@@ -5,6 +5,10 @@ module CoinSync
         if row.length != header.length
           raise "TablePrinter: All rows should have equal number of cells"
         end
+
+        if !row.all? { |c| c.is_a?(String) }
+          raise "TablePrinter: All cells should be strings"
+        end
       end
 
       ids = (0...header.length)
