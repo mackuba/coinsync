@@ -15,6 +15,10 @@ module CoinSync
       @labels = @settings['labels'] || {}
     end
 
+    def base_cryptocurrencies
+      settings['base_cryptocurrencies'] || ['USDT', 'BTC', 'ETH', 'BCH', 'BNB', 'KCS', 'NEO']
+    end
+
     def column_separator
       settings['column_separator'] || ','
     end

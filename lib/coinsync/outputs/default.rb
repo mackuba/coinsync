@@ -1,5 +1,6 @@
 require 'csv'
 
+require_relative '../crypto_classifier'
 require_relative '../formatter'
 
 module CoinSync
@@ -9,6 +10,7 @@ module CoinSync
         @config = config
         @target_file = target_file
         @formatter = Formatter.new(config)
+        @classifier = CryptoClassifier.new(config)
       end
 
       def process_transactions(transactions)
@@ -46,22 +48,24 @@ module CoinSync
       end
 
       def transaction_to_csv(tx)
-        raise "Currently unsupported" if tx.swap?
+        if tx.purchase? || tx.sale?
+          fiat_transaction_to_csv(tx)
+        else
+          swap_transaction_to_csv(tx)
+        end
+      end
 
-        asset = tx.crypto_currency.code
-        currency = tx.fiat_currency.code
-        tx_type = tx.type.to_s.capitalize
-
+      def fiat_transaction_to_csv(tx)
         csv = [
           tx.number || 0,
           tx.exchange,
-          @config.translate(tx_type),
+          @config.translate(tx.type.to_s.capitalize),
           @formatter.format_time(tx.time),
           @formatter.format_crypto(tx.crypto_amount),
-          asset,
+          tx.crypto_currency.code,
           @formatter.format_fiat(tx.fiat_amount),
           @formatter.format_fiat_price(tx.price),
-          currency || '–'
+          tx.fiat_currency.code || '–'
         ]
 
         if @config.convert_to_currency
@@ -78,6 +82,40 @@ module CoinSync
               nil
             ]
           end
+        end
+
+        csv
+      end
+
+      def swap_transaction_to_csv(tx)
+        if @classifier.is_purchase?(tx)
+          tx_type = Transaction::TYPE_PURCHASE
+          asset = tx.bought_currency
+          asset_amount = tx.bought_amount
+          currency = tx.sold_currency
+          currency_amount = tx.sold_amount
+        else
+          tx_type = Transaction::TYPE_SALE
+          asset = tx.sold_currency
+          asset_amount = tx.sold_amount
+          currency = tx.bought_currency
+          currency_amount = tx.bought_amount
+        end
+
+        csv = [
+          tx.number || 0,
+          tx.exchange,
+          @config.translate(tx_type.to_s.capitalize),
+          @formatter.format_time(tx.time),
+          @formatter.format_crypto(asset_amount),
+          asset.code,
+          @formatter.format_crypto(currency_amount),
+          @formatter.format_crypto(currency_amount / asset_amount),
+          currency.code
+        ]
+
+        if @config.convert_to_currency
+          csv += [nil, nil, nil]
         end
 
         csv
