@@ -16,12 +16,12 @@ module CoinSync
         totals = Hash.new { BigDecimal(0) }
 
         transactions.each do |tx|
-          if tx.bought_currency.is_a?(CryptoCurrency)
+          if tx.bought_currency.crypto?
             amount = totals[tx.bought_currency]
             totals[tx.bought_currency] = amount + tx.bought_amount
           end
 
-          if tx.sold_currency.is_a?(CryptoCurrency)
+          if tx.sold_currency.crypto?
             amount = totals[tx.sold_currency]
             if amount >= tx.sold_amount
               totals[tx.sold_currency] = amount - tx.sold_amount

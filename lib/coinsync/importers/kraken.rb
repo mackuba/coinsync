@@ -41,7 +41,7 @@ module CoinSync
         end
 
         def crypto?
-          @asset.is_a?(CryptoCurrency)
+          @asset.crypto?
         end
       end
 
