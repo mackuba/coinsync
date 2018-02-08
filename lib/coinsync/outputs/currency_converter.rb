@@ -1,3 +1,4 @@
+require 'bigdecimal'
 require 'time'
 
 require_relative '../currencies'
@@ -28,7 +29,7 @@ module CoinSync
             tx.converted = Transaction::ConvertedAmounts.new
             tx.converted.bought_currency = @target_currency
             tx.converted.exchange_rate = @converter.convert(
-              1.0,
+              BigDecimal.new(1),
               from: tx.bought_currency,
               to: @target_currency,
               date: tx.time.to_date
@@ -44,7 +45,7 @@ module CoinSync
 
             if tx.sold_currency.code
               tx.converted.exchange_rate = @converter.convert(
-                1.0,
+                BigDecimal.new(1),
                 from: tx.sold_currency,
                 to: @target_currency,
                 date: tx.time.to_date
@@ -52,7 +53,7 @@ module CoinSync
               tx.converted.sold_amount = tx.sold_amount * tx.converted.exchange_rate
             else
               tx.converted.exchange_rate = nil
-              tx.converted.sold_amount = 0.0
+              tx.converted.sold_amount = BigDecimal.new(0)
             end
           end
         end

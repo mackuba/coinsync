@@ -1,3 +1,4 @@
+require 'bigdecimal'
 require 'csv'
 require 'time'
 
@@ -16,10 +17,10 @@ module CoinSync
           @type = line[1]
           @date = Time.parse(line[2])
           @market = FiatCurrency.new(line[3])
-          @amount = line[4].to_f
-          @price = line[5].split(' ').first.to_f
-          @total = line[6].split(' ').first.to_f
-          @fee = line[7].split(' ').first.to_f
+          @amount = BigDecimal.new(line[4])
+          @price = BigDecimal.new(line[5].split(' ').first)
+          @total = BigDecimal.new(line[6].split(' ').first)
+          @fee = BigDecimal.new(line[7].split(' ').first)
           @fee_currency = line[7].split(' ').last
           @id = line[8].to_i
         end

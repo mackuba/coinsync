@@ -1,3 +1,4 @@
+require 'bigdecimal'
 require 'csv'
 require 'time'
 
@@ -17,9 +18,9 @@ module CoinSync
           @type = line[2]
           @from_account = line[3]
           @to_account = line[4]
-          @from_amount = line[5].gsub(/[^\d\.]+/, '').to_f
+          @from_amount = BigDecimal.new(line[5].gsub(/[^\d\.]+/, ''))
           @from_currency = FiatCurrency.new(line[6])
-          @to_amount = line[7].gsub(/[^\d\.]+/, '').to_f
+          @to_amount = BigDecimal.new(line[7].gsub(/[^\d\.]+/, ''))
           @to_currency = CryptoCurrency.new(line[8])
           @status = line[9]
         end

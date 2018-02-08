@@ -1,3 +1,4 @@
+require 'bigdecimal'
 require 'csv'
 require 'time'
 
@@ -17,9 +18,9 @@ module CoinSync
           @type = line[3]
           @aclass = line[4]
           @asset = parse_currency(line[5])
-          @amount = line[6].to_f
-          @fee = line[7].to_f
-          @balance = line[8].to_f
+          @amount = BigDecimal.new(line[6])
+          @fee = BigDecimal.new(line[7])
+          @balance = BigDecimal.new(line[8])
         end
 
         def parse_currency(code)
@@ -61,7 +62,7 @@ module CoinSync
               time: entry.time,
               bought_amount: entry.amount,
               bought_currency: entry.asset,
-              sold_amount: 0.0,
+              sold_amount: BigDecimal(0),
               sold_currency: FiatCurrency.new(nil)
             )
             next

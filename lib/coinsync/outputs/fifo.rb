@@ -1,3 +1,4 @@
+require 'bigdecimal'
 require 'csv'
 
 require_relative '../formatter'
@@ -59,7 +60,7 @@ module CoinSync
                 total_cost = converted(input).price * partial_sale.crypto_amount
                 total_gain = converted(partial_sale).fiat_amount
 
-                years[tx.time.year] ||= [0.0, 0.0]
+                years[tx.time.year] ||= [BigDecimal(0), BigDecimal(0)]
                 years[tx.time.year][0] += total_gain
                 years[tx.time.year][1] += total_cost
               end
@@ -163,7 +164,7 @@ module CoinSync
             csv += [
               @formatter.format_fiat(tx.converted.fiat_amount),
               @formatter.format_fiat_price(tx.converted.price),
-              tx.converted.exchange_rate && @formatter.format_float(tx.converted.exchange_rate, precision: 4)
+              tx.converted.exchange_rate && @formatter.format_decimal(tx.converted.exchange_rate, precision: 4)
             ]
           else
             csv += [

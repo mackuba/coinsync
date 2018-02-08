@@ -1,3 +1,5 @@
+require 'bigdecimal'
+
 require_relative '../currencies'
 require_relative '../formatter'
 
@@ -10,7 +12,7 @@ module CoinSync
       end
 
       def process_transactions(transactions)
-        totals = Hash.new(0)
+        totals = Hash.new { BigDecimal(0) }
 
         transactions.each do |tx|
           if tx.bought_currency.is_a?(CryptoCurrency)

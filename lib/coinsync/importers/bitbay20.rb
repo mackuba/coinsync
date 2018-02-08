@@ -1,3 +1,4 @@
+require 'bigdecimal'
 require 'csv'
 require 'time'
 
@@ -27,7 +28,7 @@ module CoinSync
           @type = line[2]
 
           amount, currency = line[3].split(' ')
-          @amount = amount.gsub(/,/, '').to_f
+          @amount = BigDecimal.new(amount.gsub(/,/, ''))
           @currency = parse_currency(currency)
         end
 

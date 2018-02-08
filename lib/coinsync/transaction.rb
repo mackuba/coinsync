@@ -1,3 +1,5 @@
+require 'bigdecimal'
+
 require_relative 'currencies'
 
 module CoinSync
@@ -96,10 +98,10 @@ module CoinSync
         raise "Transaction: '#{time}' is not a valid Time object"
       end
 
-      if bought_amount.is_a?(Numeric)
+      if bought_amount.is_a?(BigDecimal)
         @bought_amount = bought_amount
       else
-        raise "Transaction: '#{bought_amount}' is not a number"
+        raise "Transaction: '#{bought_amount}' should be a BigDecimal"
       end
 
       if bought_currency.is_a?(Currency)
@@ -110,10 +112,10 @@ module CoinSync
 
       (bought_amount > 0) or raise "Transaction: bought_amount should be positive (#{bought_amount})"
 
-      if sold_amount.is_a?(Numeric)
+      if sold_amount.is_a?(BigDecimal)
         @sold_amount = sold_amount
       else
-        raise "Transaction: '#{sold_amount}' is not a number"
+        raise "Transaction: '#{sold_amount}' should be a BigDecimal"
       end
 
       if sold_currency.is_a?(Currency) || sold_amount == 0
