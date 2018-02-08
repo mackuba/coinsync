@@ -2,6 +2,7 @@ require 'bigdecimal'
 
 require_relative '../currencies'
 require_relative '../formatter'
+require_relative '../table_printer'
 
 module CoinSync
   module Outputs
@@ -30,11 +31,15 @@ module CoinSync
           end
         end
 
-        max_len = totals.keys.map(&:code).map(&:length).max
-
-        totals.each do |currency, amount|
-          puts (currency.code + ":").ljust(max_len + 1) + '  ' + @formatter.format_crypto(amount)
+        rows = totals.map do |currency, amount|
+          [
+            currency.code,
+            @formatter.format_crypto(amount)
+          ]
         end
+
+        printer = TablePrinter.new
+        printer.print_table(['Coin', 'Amount'], rows, alignment: [:ljust, :rjust])
       end
     end
   end
