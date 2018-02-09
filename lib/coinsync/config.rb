@@ -16,7 +16,7 @@ module CoinSync
     end
 
     def base_cryptocurrencies
-      settings['base_cryptocurrencies'] || ['USDT', 'BTC', 'ETH', 'BCH', 'BNB', 'KCS', 'NEO']
+      settings['base_cryptocurrencies'] || ['USDT', 'BTC', 'ETH', 'BNB', 'KCS', 'LTC', 'BCH', 'NEO']
     end
 
     def column_separator
