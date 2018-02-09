@@ -12,6 +12,7 @@ module CoinSync
         bitbay20: Importers::BitBay20.new,
         bitcurex: Importers::Bitcurex.new,
         bittrex: Importers::Bittrex.new,
+        changelly: Importers::Changelly.new,
         circle: Importers::Circle.new,
         kraken: Importers::Kraken.new
       }
