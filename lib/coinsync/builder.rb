@@ -22,7 +22,16 @@ module CoinSync
       transactions = []
 
       @config.sources.each do |key, params|
-        importer = @importers[params['type'].to_sym] or raise "Unknown source type for '#{key}': #{params['type']}"
+        type = (params['type'] || key).to_sym
+        importer = @importers[type]
+
+        if importer.nil?
+          if params['type']
+            raise "Unknown source type for '#{key}': #{params['type']}"
+          else
+            raise "Unknown source type for '#{key}': please include a 'type' parameter"
+          end
+        end
 
         File.open(params['file'], 'r') do |file|
           transactions.concat(importer.read_transaction_list(file))
