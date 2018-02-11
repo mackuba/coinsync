@@ -1,4 +1,4 @@
-Dir[File.join(File.dirname(__FILE__), 'importers', '*.rb')].each { |f| load(f) }
+require_relative 'importers/all'
 
 module CoinSync
   class Builder
