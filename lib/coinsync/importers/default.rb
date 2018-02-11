@@ -13,7 +13,7 @@ module CoinSync
         attr_accessor :lp, :exchange, :type, :date, :amount, :asset, :total, :currency
       end
 
-      def initialize(config)
+      def initialize(config, params = {})
         super
         @decimal_separator = config.custom_decimal_separator
       end
