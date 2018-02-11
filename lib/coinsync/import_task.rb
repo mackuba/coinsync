@@ -12,6 +12,10 @@ module CoinSync
       @config.sources.each do |importer, key, params, filename|
         if importer.respond_to?(:can_import?)
           if importer.can_import?
+            if filename.nil?
+              raise "No filename specified for '#{key}', please add a 'file' parameter."
+            end
+
             print "[#{key}] Importing transactions... "
 
             FileUtils.mkdir_p(File.dirname(filename))
