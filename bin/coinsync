@@ -16,6 +16,11 @@ when nil
   puts "  coinsync process - generate the output csv from the input"
   puts "  coinsync run - run the complete process"
 
+when 'import'
+  config = CoinSync::Config.load_from_file('config.yml')
+  import = CoinSync::ImportTask.new(config)
+  import.run
+
 when 'build'
   FileUtils.mkdir_p 'build'
 
