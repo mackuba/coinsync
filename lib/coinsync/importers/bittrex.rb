@@ -9,6 +9,8 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class Bittrex < Base
+      register_as :bittrex
+
       class HistoryEntry
         TIME_FORMAT = '%m/%d/%Y %H:%M:%S %p %z'
 

@@ -9,6 +9,8 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class Circle < Base
+      register_as :circle
+
       class HistoryEntry
         attr_accessor :date, :id, :type, :from_account, :to_account, :from_amount, :from_currency,
           :to_amount, :to_currency, :status

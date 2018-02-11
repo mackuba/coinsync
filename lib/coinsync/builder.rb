@@ -6,16 +6,6 @@ module CoinSync
 
     def initialize(config)
       @config = config
-
-      @importers = {
-        default: Importers::Default,
-        bitbay20: Importers::BitBay20,
-        bitcurex: Importers::Bitcurex,
-        bittrex: Importers::Bittrex,
-        changelly: Importers::Changelly,
-        circle: Importers::Circle,
-        kraken: Importers::Kraken
-      }
     end
 
     def build_transaction_list
@@ -32,13 +22,14 @@ module CoinSync
           type = key.to_sym
         end
 
-        importer_class = @importers[type]
+        importer_class = Importers.registered[type]
 
         if importer_class.nil?
           if importer_params['type']
             raise "Unknown source type for '#{key}': #{params['type']}"
           else
-            raise "Unknown source type for '#{key}': please include a 'type' parameter"
+            raise "Unknown source type for '#{key}': please include a 'type' parameter " +
+              "or use a name of an existing importer"
           end
         end
 
