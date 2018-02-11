@@ -18,7 +18,7 @@ module CoinSync
 
         case response
         when Net::HTTPSuccess
-          json = JSON.load(response.body)
+          json = JSON.parse(response.body)
           rate = json['rates'][to.code.upcase]
           raise NoDataException.new("No exchange rate found for #{to.code.upcase}") if rate.nil?
 
