@@ -1,3 +1,4 @@
+require "coinsync/balance_task"
 require "coinsync/builder"
 require "coinsync/config"
 require "coinsync/currencies"

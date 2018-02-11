@@ -5,6 +5,7 @@ require 'openssl'
 require 'time'
 
 require_relative 'base'
+require_relative '../balance'
 require_relative '../currencies'
 require_relative '../transaction'
 
@@ -100,6 +101,20 @@ module CoinSync
         transactions.each_with_index { |tx, i| tx.delete('i') }
 
         File.write(filename, JSON.pretty_generate(transactions))
+      end
+
+      def import_balances
+        info = fetch_info
+
+        info['balances'].select { |k, v|
+          v['available'].to_f > 0 || v['locked'].to_f > 0
+        }.map { |k, v|
+          Balance.new(
+            CryptoCurrency.new(k),
+            available: BigDecimal.new(v['available']),
+            locked: BigDecimal.new(v['locked'])
+          )
+        }
       end
 
       def read_transaction_list(source)

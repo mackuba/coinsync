@@ -6,6 +6,7 @@ require 'openssl'
 require 'time'
 
 require_relative 'base'
+require_relative '../balance'
 require_relative '../currencies'
 require_relative '../transaction'
 
@@ -63,6 +64,50 @@ module CoinSync
           raise "Kucoin importer: Bad request: #{response}"
         else
           raise "Kucoin importer: Bad response: #{response}"
+        end
+      end
+
+      def import_balances
+        page = 1
+        full_list = []
+
+        loop do
+          response = make_request('/account/balances', limit: 20, page: page)
+
+          case response
+          when Net::HTTPSuccess
+            json = JSON.parse(response.body)
+
+            if json['success'] != true || json['code'] != 'OK'
+              raise "Kucoin importer: Invalid response: #{response.body}"
+            end
+
+            data = json['data']
+            list = data && data['datas']
+
+            if !list
+              raise "Kucoin importer: No data returned: #{response.body}"
+            end
+
+            full_list.concat(list)
+
+            page += 1
+            break if page > data['pageNos']
+          when Net::HTTPBadRequest
+            raise "Kucoin importer: Bad request: #{response}"
+          else
+            raise "Kucoin importer: Bad response: #{response}"
+          end
+        end
+
+        full_list.delete_if { |b| b['balance'] == 0.0 && b['freezeBalance'] == 0.0 }
+
+        full_list.map do |b|
+          Balance.new(
+            CryptoCurrency.new(b['coinType']),
+            available: BigDecimal.new(b['balanceStr']),
+            locked: BigDecimal.new(b['freezeBalanceStr'])
+          )
         end
       end
 
