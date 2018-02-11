@@ -2,12 +2,13 @@ require 'bigdecimal'
 require 'csv'
 require 'time'
 
+require_relative 'base'
 require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
   module Importers
-    class Changelly
+    class Changelly < Base
       class HistoryEntry
         attr_accessor :status, :date, :exchanged_currency, :exchanged_amount, :received_currency, :received_amount
 

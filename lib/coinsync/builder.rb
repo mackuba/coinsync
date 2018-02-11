@@ -8,13 +8,13 @@ module CoinSync
       @config = config
 
       @importers = {
-        default: Importers::Default.new(config),
-        bitbay20: Importers::BitBay20.new,
-        bitcurex: Importers::Bitcurex.new,
-        bittrex: Importers::Bittrex.new,
-        changelly: Importers::Changelly.new,
-        circle: Importers::Circle.new,
-        kraken: Importers::Kraken.new
+        default: Importers::Default,
+        bitbay20: Importers::BitBay20,
+        bitcurex: Importers::Bitcurex,
+        bittrex: Importers::Bittrex,
+        changelly: Importers::Changelly,
+        circle: Importers::Circle,
+        kraken: Importers::Kraken
       }
     end
 
@@ -23,9 +23,9 @@ module CoinSync
 
       @config.sources.each do |key, params|
         type = (params.is_a?(Hash) && params['type'] || key).to_sym
-        importer = @importers[type]
+        importer_class = @importers[type]
 
-        if importer.nil?
+        if importer_class.nil?
           if params.is_a?(Hash) && params['type']
             raise "Unknown source type for '#{key}': #{params['type']}"
           else
@@ -33,6 +33,7 @@ module CoinSync
           end
         end
 
+        importer = importer_class.new(@config)
         filename = params.is_a?(Hash) ? params['file'] : params
 
         File.open(filename, 'r') do |file|

@@ -2,12 +2,13 @@ require 'bigdecimal'
 require 'csv'
 require 'time'
 
+require_relative 'base'
 require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
   module Importers
-    class Kraken
+    class Kraken < Base
       class LedgerEntry
         attr_accessor :txid, :refid, :time, :type, :aclass, :asset, :amount, :fee, :balance
 

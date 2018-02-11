@@ -2,12 +2,13 @@ require 'bigdecimal'
 require 'csv'
 require 'time'
 
+require_relative 'base'
 require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
   module Importers
-    class Bitcurex
+    class Bitcurex < Base
       class HistoryEntry
         attr_accessor :lp, :type, :date, :market, :amount, :price, :total, :fee, :fee_currency, :id
 

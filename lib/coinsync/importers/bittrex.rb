@@ -2,12 +2,13 @@ require 'bigdecimal'
 require 'csv'
 require 'time'
 
+require_relative 'base'
 require_relative '../currencies'
 require_relative '../transaction'
 
 module CoinSync
   module Importers
-    class Bittrex
+    class Bittrex < Base
       class HistoryEntry
         TIME_FORMAT = '%m/%d/%Y %H:%M:%S %p %z'
 
