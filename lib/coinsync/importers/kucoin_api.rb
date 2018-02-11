@@ -102,7 +102,7 @@ module CoinSync
 
         url.query = build_query_string(params)
 
-        string_to_hash = Base64.encode64("#{endpoint}/#{nonce}/#{url.query}").strip
+        string_to_hash = Base64.strict_encode64("#{endpoint}/#{nonce}/#{url.query}")
         hmac = OpenSSL::HMAC.hexdigest('sha256', @api_secret, string_to_hash)
 
         Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
