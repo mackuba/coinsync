@@ -11,30 +11,7 @@ module CoinSync
     def build_transaction_list
       transactions = []
 
-      @config.sources.each do |key, params|
-        if params.is_a?(Hash)
-          filename = params['file']
-          importer_params = params
-          type = (params['type'] || key).to_sym
-        else
-          filename = params
-          importer_params = {}
-          type = key.to_sym
-        end
-
-        importer_class = Importers.registered[type]
-
-        if importer_class.nil?
-          if importer_params['type']
-            raise "Unknown source type for '#{key}': #{params['type']}"
-          else
-            raise "Unknown source type for '#{key}': please include a 'type' parameter " +
-              "or use a name of an existing importer"
-          end
-        end
-
-        importer = importer_class.new(@config, importer_params)
-
+      @config.sources.each do |importer, key, params, filename|
         File.open(filename, 'r') do |file|
           transactions.concat(importer.read_transaction_list(file))
         end

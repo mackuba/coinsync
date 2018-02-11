@@ -2,7 +2,7 @@ require 'yaml'
 
 module CoinSync
   class Config
-    attr_reader :sources, :settings
+    attr_reader :settings
 
     def self.load_from_file(filename)
       yaml = YAML.load(File.read(filename))
@@ -13,6 +13,35 @@ module CoinSync
       @sources = yaml['sources'] or raise 'Config: No sources listed'
       @settings = yaml['settings'] || {}
       @labels = @settings['labels'] || {}
+    end
+
+    def sources
+      @importers ||= @sources.map do |key, params|
+        if params.is_a?(Hash)
+          filename = params['file']
+          importer_params = params
+          type = (params['type'] || key).to_sym
+        else
+          filename = params
+          importer_params = {}
+          type = key.to_sym
+        end
+
+        importer_class = Importers.registered[type]
+
+        if importer_class.nil?
+          if importer_params['type']
+            raise "Unknown source type for '#{key}': #{params['type']}"
+          else
+            raise "Unknown source type for '#{key}': please include a 'type' parameter " +
+              "or use a name of an existing importer"
+          end
+        end
+
+        importer = importer_class.new(self, importer_params)
+
+        [importer, key, importer_params, filename]
+      end
     end
 
     def base_cryptocurrencies
