@@ -3,7 +3,6 @@ require 'bigdecimal'
 require 'json'
 require 'net/http'
 require 'openssl'
-require 'time'
 
 require_relative 'base'
 require_relative '../balance'
