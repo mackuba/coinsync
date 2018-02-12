@@ -24,7 +24,7 @@ when 'balance'
 when 'import'
   config = CoinSync::Config.load_from_file('config.yml')
   import = CoinSync::ImportTask.new(config)
-  import.run
+  import.run(ARGV[1])
 
 when 'build'
   FileUtils.mkdir_p 'build'

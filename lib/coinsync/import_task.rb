@@ -8,8 +8,16 @@ module CoinSync
       @config = config
     end
 
-    def run
-      @config.sources.each do |importer, key, params, filename|
+    def run(selected = nil)
+      sources = if selected
+        found = @config.sources.detect { |importer, key, params, filename| key == selected }
+        raise "Source not found in the config file: '#{selected}'" if found.nil?
+        [found]
+      else
+        @config.sources
+      end
+
+      sources.each do |importer, key, params, filename|
         if importer.respond_to?(:can_import?)
           if importer.can_import?
             if filename.nil?
