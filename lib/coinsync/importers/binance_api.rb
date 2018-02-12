@@ -48,6 +48,8 @@ module CoinSync
 
       def initialize(config, params = {})
         super
+
+        # only "Read Info" permission is required for the key
         @api_key = params['api_key']
         @secret_key = params['secret_key']
         @traded_pairs = params['traded_pairs']

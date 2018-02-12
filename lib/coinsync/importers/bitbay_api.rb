@@ -61,6 +61,14 @@ module CoinSync
 
       def initialize(config, params = {})
         super
+
+        # required permissions:
+        # * for balance checks:
+        #   - "Crypto deposit" (shown as "Get and create cryptocurrency addresses" + "Funds deposit")
+        #   - "Updating a wallets list" (shown as "Pobieranie rachunków")
+        # * for transaction history:
+        #   - "History" (shown as "Fetch history of transactions")
+
         @public_key = params['api_public_key']
         @secret_key = params['api_private_key']
       end
