@@ -12,6 +12,14 @@ module CoinSync
   end
 
   class CryptoCurrency < Currency
+    MAPPING = {
+      'XRB' => 'NANO'
+    }
+
+    def initialize(code)
+      super(MAPPING[code] || code)
+    end
+
     def fiat?
       false
     end
