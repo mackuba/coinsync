@@ -13,6 +13,12 @@ module CoinSync
       @sources = yaml['sources'] or raise 'Config: No sources listed'
       @settings = yaml['settings'] || {}
       @labels = @settings['labels'] || {}
+
+      if includes = yaml['include']
+        includes.each do |file|
+          require(File.expand_path(File.join('.', file)))
+        end
+      end
     end
 
     def sources
