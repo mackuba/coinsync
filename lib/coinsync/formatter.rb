@@ -5,23 +5,29 @@ module CoinSync
       @decimal_separator = config.custom_decimal_separator
     end
 
-    def format_decimal(value, precision:, remove_trailing_zeros: false)
+    def format_decimal(value, precision: nil)
+      v = precision ? value.round(precision) : value
+      s = v.to_s('F').gsub(/\.0$/, '')
+      s = s.gsub(/\./, @decimal_separator) if @decimal_separator
+      s
+    end
+
+    def format_float(value, precision:)
       s = sprintf("%.#{precision}f", value)
-      s = s.gsub(/0+$/, '').gsub(/\.$/, '') if remove_trailing_zeros
       s = s.gsub(/\./, @decimal_separator) if @decimal_separator
       s
     end
 
     def format_fiat(amount)
-      format_decimal(amount, precision: 2)
+      format_float(amount, precision: 2)
     end
 
     def format_fiat_price(amount)
-      format_decimal(amount, precision: (amount < 10 ? 4 : 2))
+      format_float(amount, precision: (amount < 10 ? 4 : 2))
     end
 
     def format_crypto(amount)
-      format_decimal(amount, precision: 8, remove_trailing_zeros: true)
+      format_decimal(amount, precision: 8)
     end
 
     def format_time(time)
