@@ -4,6 +4,7 @@ require 'time'
 
 require_relative 'base'
 require_relative '../currencies'
+require_relative '../formatter'
 require_relative '../transaction'
 
 module CoinSync
@@ -18,6 +19,7 @@ module CoinSync
       def initialize(config, params = {})
         super
         @decimal_separator = config.custom_decimal_separator
+        @formatter = Formatter.new(config)
       end
 
       def read_transaction_list(source)
@@ -67,17 +69,12 @@ module CoinSync
         entry.exchange = line[1]
         entry.type = line[2]
         entry.date = Time.parse(line[3])
-        entry.amount = parse_decimal(line[4])
+        entry.amount = @formatter.parse_decimal(line[4])
         entry.asset = CryptoCurrency.new(line[5])
-        entry.total = parse_decimal(line[6])
+        entry.total = @formatter.parse_decimal(line[6])
         entry.currency = FiatCurrency.new(line[7])
 
         entry
-      end
-
-      def parse_decimal(string)
-        string = string.gsub(@decimal_separator, '.') if @decimal_separator
-        BigDecimal.new(string)
       end
     end
   end

@@ -1,3 +1,5 @@
+require 'bigdecimal'
+
 module CoinSync
   class Formatter
     def initialize(config)
@@ -32,6 +34,11 @@ module CoinSync
 
     def format_time(time)
       time.strftime(@config.time_format || '%Y-%m-%d %H:%M:%S')
+    end
+
+    def parse_decimal(string)
+      string = string.gsub(@decimal_separator, '.') if @decimal_separator
+      BigDecimal.new(string)
     end
   end
 end
