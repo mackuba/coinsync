@@ -1,5 +1,9 @@
 module CoinSync
-  Currency = Struct.new(:code)
+  class Currency < Struct.new(:code)
+    def <=>(other)
+      self.code <=> other.code
+    end
+  end
 
   class FiatCurrency < Currency
     def fiat?
