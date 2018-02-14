@@ -37,7 +37,7 @@ module CoinSync
 
       def import_transactions(filename)
         offset = 0
-        limit = 100
+        limit = 50
         transactions = []
 
         loop do
