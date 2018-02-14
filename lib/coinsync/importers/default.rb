@@ -72,7 +72,12 @@ module CoinSync
         entry.amount = @formatter.parse_decimal(line[4])
         entry.asset = CryptoCurrency.new(line[5])
         entry.total = @formatter.parse_decimal(line[6])
-        entry.currency = FiatCurrency.new(line[7])
+
+        entry.currency = if line[7].start_with?('$')
+          CryptoCurrency.new(line[7][1..-1])
+        else
+          FiatCurrency.new(line[7])
+        end
 
         entry
       end
