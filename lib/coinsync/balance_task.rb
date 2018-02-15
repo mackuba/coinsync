@@ -10,34 +10,54 @@ module CoinSync
     end
 
     def run
-      totals = {}
+      balances = {}
+      columns = []
+      rows = []
 
       @config.sources.each do |importer, key, params, filename|
         if importer.respond_to?(:can_import?)
           if importer.can_import?
-            puts "[#{key}] Importing balances... "
+            print "[#{key}] Importing balances... "
+
+            columns << key
 
             importer.import_balances.each do |balance|
-              totals[balance.currency] ||= Balance.new(balance.currency)
-              totals[balance.currency] += balance
-
-              puts "  #{balance.currency.code}: " +
-                "#{@formatter.format_crypto(balance.available)} " +
-                "(+ #{@formatter.format_crypto(balance.locked)})"
+              balances[balance.currency] ||= {}
+              balances[balance.currency][key] = balance
+              balances[balance.currency][nil] ||= Balance.new(balance.currency)
+              balances[balance.currency][nil] += balance
             end
+
+            puts "√"
           else
             puts "[#{key}] Skipping import"
           end
         end
       end
 
-      puts "Total:"
+      columns.sort!
 
-      totals.each do |currency, balance|
-        puts "  #{currency.code}: " +
-          "#{@formatter.format_crypto(balance.available)} " +
-          "(+ #{@formatter.format_crypto(balance.locked)})"
+      balances.keys.sort.each do |coin|
+        row = [coin.code, '|']
+        row += columns.map { |e|
+          available = balances[coin][e]&.available
+          locked = balances[coin][e]&.locked
+          available ? @formatter.format_crypto(available) + (locked > 0 ? ' (+)' : '') : ''
+        }
+        row << '|'
+        row << @formatter.format_crypto(balances[coin][nil].available)
+        rows << row
       end
+
+      puts
+
+      printer = TablePrinter.new
+      printer.print_table(
+        ['Coin', '|'] + columns + ['|', 'TOTAL'],
+        rows,
+        alignment: [:ljust, :center] + columns.map { |e| :rjust } + [:center, :rjust],
+        separator: '   '
+      )
     end
   end
 end
