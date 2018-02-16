@@ -1,10 +1,15 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
-require 'coinsync'
 
-require 'fileutils'
-require 'yaml'
+require 'coinsync/config'
+require 'coinsync/balance_task'
+require 'coinsync/build_task'
+require 'coinsync/import_task'
+
+def load_config
+  CoinSync::Config.load_from_file('config.yml')
+end
 
 command = ARGV.shift
 
@@ -17,46 +22,18 @@ when nil
   puts "  coinsync run - run the complete process"
 
 when 'balance'
-  config = CoinSync::Config.load_from_file('config.yml')
-  import = CoinSync::BalanceTask.new(config)
-  import.run
+  task = CoinSync::BalanceTask.new(load_config)
+  task.run
 
 when 'import'
-  config = CoinSync::Config.load_from_file('config.yml')
-  import = CoinSync::ImportTask.new(config)
-  import.run(ARGV[1])
+  importer_name = ARGV.shift
+  task = CoinSync::ImportTask.new(load_config)
+  task.run(importer_name)
 
 when 'build'
   output_name = ARGV.shift
-
-  if output_name.nil?
-    puts "Usage: coinsync build <task>"
-    exit 1
-  end
-
-  output_class = CoinSync::Outputs.registered[output_name.to_sym]
-
-  if output_class.nil?
-    puts "Unknown output type: #{output_name}"
-    exit 1
-  end
-
-  FileUtils.mkdir_p 'build'
-
-  config = CoinSync::Config.load_from_file('config.yml')
-  builder = CoinSync::Builder.new(config)
-  transactions = builder.build_transaction_list
-
-  output = output_class.new(config, "build/#{output_name}.csv")
-
-  if output.respond_to?(:requires_currency_conversion?) && output.requires_currency_conversion?
-    if config.convert_to_currency
-      converter = CoinSync::CurrencyConverter.new(config)
-      converter.process_transactions(transactions)
-    end
-  end
-
-  output.process_transactions(transactions)
+  task = CoinSync::BuildTask.new(load_config)
+  task.run(output_name)
 
 else
   raise "Unknown command #{command}"
