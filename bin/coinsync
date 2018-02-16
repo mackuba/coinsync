@@ -51,7 +51,7 @@ when 'build'
 
   if output.respond_to?(:requires_currency_conversion?) && output.requires_currency_conversion?
     if config.convert_to_currency
-      converter = CoinSync::Outputs::CurrencyConverter.new(config)
+      converter = CoinSync::CurrencyConverter.new(config)
       converter.process_transactions(transactions)
     end
   end
