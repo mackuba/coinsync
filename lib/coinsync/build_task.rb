@@ -2,8 +2,7 @@ require 'fileutils'
 
 require_relative 'builder'
 require_relative 'currency_converter'
-
-Dir[File.join(File.dirname(__FILE__), 'outputs', '*.rb')].each { |f| load(f) }
+require_relative 'outputs/all'
 
 module CoinSync
   class BuildTask

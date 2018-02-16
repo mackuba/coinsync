@@ -2,9 +2,8 @@ require 'bigdecimal'
 require 'time'
 
 require_relative 'currencies'
+require_relative 'currency_converters/all'
 require_relative 'transaction'
-
-Dir[File.join(File.dirname(__FILE__), 'currency_converters', '*.rb')].each { |f| load(f) }
 
 module CoinSync
   class CurrencyConverter
