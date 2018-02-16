@@ -1,15 +1,22 @@
 require 'bigdecimal'
 
+require_relative 'base'
 require_relative '../currencies'
 require_relative '../formatter'
 require_relative '../table_printer'
 
 module CoinSync
   module Outputs
-    class Summary
-      def initialize(config)
-        @config = config
+    class Summary < Base
+      register_as :summary
+
+      def initialize(config, target_file)
+        super
         @formatter = Formatter.new(@config)
+      end
+
+      def requires_currency_conversion?
+        false
       end
 
       def process_transactions(transactions)

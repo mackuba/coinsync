@@ -1,16 +1,22 @@
 require 'csv'
 
+require_relative 'base'
 require_relative '../crypto_classifier'
 require_relative '../formatter'
 
 module CoinSync
   module Outputs
-    class Default
+    class Default < Base
+      register_as :default
+
       def initialize(config, target_file)
-        @config = config
-        @target_file = target_file
+        super
         @formatter = Formatter.new(config)
         @classifier = CryptoClassifier.new(config)
+      end
+
+      def requires_currency_conversion?
+        true
       end
 
       def process_transactions(transactions)

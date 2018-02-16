@@ -6,7 +6,7 @@ require 'coinsync'
 require 'fileutils'
 require 'yaml'
 
-command = ARGV[0]
+command = ARGV.shift
 
 case command
 when nil
@@ -27,40 +27,35 @@ when 'import'
   import.run(ARGV[1])
 
 when 'build'
+  output_name = ARGV.shift
+
+  if output_name.nil?
+    puts "Usage: coinsync build <task>"
+    exit 1
+  end
+
+  output_class = CoinSync::Outputs.registered[output_name.to_sym]
+
+  if output_class.nil?
+    puts "Unknown output type: #{output_name}"
+    exit 1
+  end
+
   FileUtils.mkdir_p 'build'
 
   config = CoinSync::Config.load_from_file('config.yml')
   builder = CoinSync::Builder.new(config)
   transactions = builder.build_transaction_list
 
-  if config.convert_to_currency
-    converter = CoinSync::Outputs::CurrencyConverter.new(config)
-    converter.process_transactions(transactions)
+  output = output_class.new(config, "build/#{output_name}.csv")
+
+  if output.respond_to?(:requires_currency_conversion?) && output.requires_currency_conversion?
+    if config.convert_to_currency
+      converter = CoinSync::Outputs::CurrencyConverter.new(config)
+      converter.process_transactions(transactions)
+    end
   end
 
-  output = CoinSync::Outputs::Default.new(config, 'build/input.csv')
-  output.process_transactions(transactions)
-
-when 'summary'
-  config = CoinSync::Config.load_from_file('config.yml')
-  builder = CoinSync::Builder.new(config)
-  transactions = builder.build_transaction_list
-
-  CoinSync::Outputs::Summary.new(config).process_transactions(transactions)
-
-when 'fifo'
-  FileUtils.mkdir_p 'build'
-
-  config = CoinSync::Config.load_from_file('config.yml')
-  builder = CoinSync::Builder.new(config)
-  transactions = builder.build_transaction_list
-
-  if config.convert_to_currency
-    converter = CoinSync::Outputs::CurrencyConverter.new(config)
-    converter.process_transactions(transactions)
-  end
-
-  output = CoinSync::Outputs::Fifo.new(config, 'build/output.csv')
   output.process_transactions(transactions)
 
 else

@@ -1,13 +1,16 @@
 require 'bigdecimal'
 require 'csv'
 
+require_relative 'base'
 require_relative '../formatter'
 require_relative '../table_printer'
 require_relative '../transaction'
 
 module CoinSync
   module Outputs
-    class Fifo
+    class Fifo < Base
+      register_as :fifo
+
       class TransactionFragment < SimpleDelegator
         attr_reader :amount_left, :transaction
 
@@ -30,9 +33,12 @@ module CoinSync
       end
 
       def initialize(config, target_file)
-        @config = config
-        @target_file = target_file
+        super
         @formatter = Formatter.new(config)
+      end
+
+      def requires_currency_conversion?
+        true
       end
 
       def process_transactions(transactions)
