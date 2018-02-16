@@ -6,6 +6,8 @@ require_relative 'base'
 module CoinSync
   module CurrencyConverters
     class Fixer < Base
+      register_converter :fixer
+
       BASE_URL = "https://api.fixer.io"
 
       class Exception < StandardError; end

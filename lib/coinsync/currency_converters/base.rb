@@ -5,7 +5,19 @@ require_relative '../currencies'
 
 module CoinSync
   module CurrencyConverters
+    def self.registered
+      @converters ||= {}
+    end
+
     class Base
+      def self.register_converter(key)
+        if CurrencyConverters.registered[key]
+          raise "Currency converter has already been registered at '#{key}'"
+        else
+          CurrencyConverters.registered[key] = self
+        end
+      end
+
       def initialize
         @cache = Cache.new(self.class.name.downcase.split('::').last)
       end

@@ -10,14 +10,15 @@ module CoinSync
   class CurrencyConverter
     def initialize(config)
       @config = config
-
-      @converter = case config.currency_converter || :fixer
-      when :fixer then CurrencyConverters::Fixer.new
-      when :nbp then CurrencyConverters::NBP.new
-      else raise "Unknown currency converter #{config.currency_converter}"
-      end
-
       @target_currency = config.convert_to_currency
+
+      converter_class = CurrencyConverters.registered[config.currency_converter]
+
+      if converter_class
+        @converter = converter_class.new
+      else
+        raise "Unknown currency converter #{config.currency_converter}"
+      end
     end
 
     def process_transactions(transactions)

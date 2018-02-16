@@ -6,6 +6,8 @@ require_relative 'base'
 module CoinSync
   module CurrencyConverters
     class NBP < Base
+      register_converter :nbp
+
       BASE_URL = "https://api.nbp.pl/api"
 
       class Exception < StandardError; end

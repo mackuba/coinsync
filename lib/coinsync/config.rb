@@ -71,7 +71,7 @@ module CoinSync
     end
 
     def currency_converter
-      settings['convert_with']&.to_sym
+      settings['convert_with']&.to_sym || :fixer
     end
 
     def time_format
