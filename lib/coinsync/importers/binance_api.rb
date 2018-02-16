@@ -11,7 +11,7 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class BinanceAPI < Base
-      register_as :binance_api
+      register_importer :binance_api
 
       BASE_URL = "https://api.binance.com/api"
       BASE_COINS = ['BTC', 'ETH', 'BNB', 'USDT']

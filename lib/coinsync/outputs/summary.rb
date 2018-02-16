@@ -8,7 +8,7 @@ require_relative '../table_printer'
 module CoinSync
   module Outputs
     class Summary < Base
-      register_as :summary
+      register_output :summary
 
       def initialize(config, target_file)
         super

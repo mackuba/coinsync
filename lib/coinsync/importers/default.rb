@@ -10,7 +10,7 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class Default < Base
-      register_as :default
+      register_importer :default
 
       class HistoryEntry
         attr_accessor :lp, :exchange, :type, :date, :amount, :asset, :total, :currency

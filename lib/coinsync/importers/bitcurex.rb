@@ -9,7 +9,7 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class Bitcurex < Base
-      register_as :bitcurex
+      register_importer :bitcurex
 
       class HistoryEntry
         attr_accessor :lp, :type, :date, :market, :amount, :price, :total, :fee, :fee_currency, :id

@@ -12,7 +12,7 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class KucoinAPI < Base
-      register_as :kucoin_api
+      register_importer :kucoin_api
 
       BASE_URL = "https://api.kucoin.com"
 

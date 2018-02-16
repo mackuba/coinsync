@@ -9,7 +9,7 @@ require_relative '../transaction'
 module CoinSync
   module Outputs
     class Fifo < Base
-      register_as :fifo
+      register_output :fifo
 
       class TransactionFragment < SimpleDelegator
         attr_reader :amount_left, :transaction

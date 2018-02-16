@@ -9,7 +9,7 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class Changelly < Base
-      register_as :changelly
+      register_importer :changelly
 
       class HistoryEntry
         attr_accessor :status, :date, :exchanged_currency, :exchanged_amount, :received_currency, :received_amount

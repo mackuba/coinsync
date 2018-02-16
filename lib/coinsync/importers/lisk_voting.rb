@@ -11,7 +11,7 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class LiskVoting < Base
-      register_as :lisk_voting
+      register_importer :lisk_voting
 
       BASE_URL = "https://explorer.lisk.io/api"
       EPOCH_TIME = Time.parse('2016-05-24 17:00 UTC')

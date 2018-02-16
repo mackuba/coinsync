@@ -5,7 +5,7 @@ module CoinSync
     end
 
     class Base
-      def self.register_as(key)
+      def self.register_importer(key)
         if Importers.registered[key]
           raise "Importer has already been registered at '#{key}'"
         else

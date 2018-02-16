@@ -7,7 +7,7 @@ require_relative '../formatter'
 module CoinSync
   module Outputs
     class Default < Base
-      register_as :default
+      register_output :default
 
       def initialize(config, target_file)
         super

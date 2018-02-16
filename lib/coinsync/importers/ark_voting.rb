@@ -11,7 +11,7 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class ArkVoting < Base
-      register_as :ark_voting
+      register_importer :ark_voting
 
       BASE_URL = "https://explorer.dafty.net/api"
       EPOCH_TIME = Time.parse('2017-03-21 13:00 UTC')

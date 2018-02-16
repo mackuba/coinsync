@@ -12,7 +12,7 @@ require_relative '../transaction'
 module CoinSync
   module Importers
     class BitBayAPI < Base
-      register_as :bitbay_api
+      register_importer :bitbay_api
 
       BASE_URL = "https://bitbay.net/API/Trading/tradingApi.php"
 
