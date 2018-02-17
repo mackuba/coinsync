@@ -26,9 +26,9 @@ when 'balance'
   task.run
 
 when 'import'
-  importer_name = ARGV.shift
+  importers = ARGV
   task = CoinSync::ImportTask.new(load_config)
-  task.run(importer_name)
+  task.run(importers)
 
 when 'build'
   output_name = ARGV.shift
