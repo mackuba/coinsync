@@ -85,7 +85,7 @@ module CoinSync
           end
         end
 
-        File.write(filename, JSON.pretty_generate(transactions.sort_by { |tx| tx['time'] }))
+        File.write(filename, JSON.pretty_generate(transactions.sort_by { |tx| [tx['time'], tx['id']] }))
       end
 
       def import_balances
