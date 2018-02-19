@@ -26,9 +26,10 @@ when 'balance'
   task.run
 
 when 'import'
-  importers = ARGV
+  importers = ARGV.select { |a| !a.start_with?('^') }
+  except = ARGV.select { |a| a.start_with?('^') }.map { |a| a.gsub(/^\^/, '') }
   task = CoinSync::ImportTask.new(load_config)
-  task.run(importers)
+  task.run(importers, except)
 
 when 'build'
   output_name = ARGV.shift

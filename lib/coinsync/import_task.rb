@@ -8,7 +8,7 @@ module CoinSync
       @config = config
     end
 
-    def run(selected = nil)
+    def run(selected = nil, except = nil)
       sources = if selected.nil? || selected.empty?
         @config.sources
       else
@@ -18,6 +18,11 @@ module CoinSync
           found = @config.sources.detect { |importer, key, params, filename| key == searched_key }
           found or raise "Source not found in the config file: '#{searched_key}'"
         end
+      end
+
+      if except
+        except = [except] unless except.is_a?(Array)
+        sources = sources.reject { |importer, key, params, filename| except.include?(key) }
       end
 
       sources.each do |importer, key, params, filename|
