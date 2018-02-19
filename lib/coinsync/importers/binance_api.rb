@@ -156,7 +156,7 @@ module CoinSync
         params['timestamp'] = (Time.now.to_f * 1000).to_i
 
         url = URI(BASE_URL + path)
-        url.query = params.map { |k, v| "#{k}=#{v}" }.join('&')
+        url.query = URI.encode_www_form(params)
 
         hmac = OpenSSL::HMAC.hexdigest('sha256', @secret_key, url.query)
         url.query += "&signature=#{hmac}"

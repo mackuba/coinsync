@@ -101,7 +101,7 @@ module CoinSync
 
       def make_request(path, params = {})
         url = URI(BASE_URL + path)
-        url.query = params.map { |k, v| "#{k}=#{v}" }.join('&')
+        url.query = URI.encode_www_form(params)
 
         Request.get(url)
       end

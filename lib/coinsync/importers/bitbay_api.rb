@@ -191,7 +191,7 @@ module CoinSync
         params['method'] = method
         params['moment'] = Time.now.to_i
 
-        param_string = params.map { |k, v| "#{k}=#{v}" }.join('&')
+        param_string = URI.encode_www_form(params)
         hmac = OpenSSL::HMAC.hexdigest('sha512', @secret_key, param_string)
 
         Request.post(url) do |request|
