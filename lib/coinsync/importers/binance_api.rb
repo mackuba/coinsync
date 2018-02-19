@@ -2,10 +2,12 @@ require 'bigdecimal'
 require 'json'
 require 'net/http'
 require 'openssl'
+require 'uri'
 
 require_relative 'base'
 require_relative '../balance'
 require_relative '../currencies'
+require_relative '../request'
 require_relative '../transaction'
 
 module CoinSync
@@ -159,11 +161,8 @@ module CoinSync
         hmac = OpenSSL::HMAC.hexdigest('sha256', @secret_key, url.query)
         url.query += "&signature=#{hmac}"
 
-        Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
-          request = Net::HTTP::Get.new(url)
+        Request.get(url) do |request|
           request['X-MBX-APIKEY'] = @api_key
-
-          http.request(request)
         end
       end
     end

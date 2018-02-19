@@ -2,6 +2,7 @@ require 'json'
 require 'net/http'
 
 require_relative 'base'
+require_relative '../request'
 
 module CoinSync
   module CurrencyConverters
@@ -17,8 +18,7 @@ module CoinSync
       def fetch_conversion_rate(from:, to:, date:)
         raise "Only conversions to PLN are supported" if to.code != 'PLN'
 
-        url = URI("#{BASE_URL}/exchangerates/rates/a/#{from.code}/#{date - 8}/#{date - 1}/?format=json")
-        response = Net::HTTP.get_response(url)
+        response = Request.get("#{BASE_URL}/exchangerates/rates/a/#{from.code}/#{date - 8}/#{date - 1}/?format=json")
 
         case response
         when Net::HTTPSuccess

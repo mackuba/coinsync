@@ -3,10 +3,12 @@ require 'bigdecimal'
 require 'json'
 require 'net/http'
 require 'openssl'
+require 'uri'
 
 require_relative 'base'
 require_relative '../balance'
 require_relative '../currencies'
+require_relative '../request'
 require_relative '../transaction'
 
 module CoinSync
@@ -149,14 +151,10 @@ module CoinSync
         string_to_hash = Base64.strict_encode64("#{endpoint}/#{nonce}/#{url.query}")
         hmac = OpenSSL::HMAC.hexdigest('sha256', @api_secret, string_to_hash)
 
-        Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
-          request = Net::HTTP::Get.new(url)
-
+        Request.get(url) do |request|
           request['KC-API-KEY'] = @api_key
           request['KC-API-NONCE'] = nonce
           request['KC-API-SIGNATURE'] = hmac
-
-          http.request(request)
         end
       end
 

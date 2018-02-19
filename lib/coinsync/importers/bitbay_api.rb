@@ -3,10 +3,12 @@ require 'json'
 require 'net/http'
 require 'openssl'
 require 'time'
+require 'uri'
 
 require_relative 'base'
 require_relative '../balance'
 require_relative '../currencies'
+require_relative '../request'
 require_relative '../transaction'
 
 module CoinSync
@@ -192,14 +194,10 @@ module CoinSync
         param_string = params.map { |k, v| "#{k}=#{v}" }.join('&')
         hmac = OpenSSL::HMAC.hexdigest('sha512', @secret_key, param_string)
 
-        Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
-          request = Net::HTTP::Post.new(url)
+        Request.post(url) do |request|
           request.body = param_string
-
           request['API-Key'] = @public_key
           request['API-Hash'] = hmac
-
-          http.request(request)
         end
       end
 

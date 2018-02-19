@@ -2,6 +2,7 @@ require 'json'
 require 'net/http'
 
 require_relative 'base'
+require_relative '../request'
 
 module CoinSync
   module CurrencyConverters
@@ -15,8 +16,7 @@ module CoinSync
       class BadRequestException < Exception; end
 
       def fetch_conversion_rate(from:, to:, date:)
-        url = URI("#{BASE_URL}/#{date}?base=#{from.code}")
-        response = Net::HTTP.get_response(url)
+        response = Request.get("#{BASE_URL}/#{date}?base=#{from.code}")
 
         case response
         when Net::HTTPSuccess

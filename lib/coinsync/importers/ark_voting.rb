@@ -2,10 +2,12 @@ require 'bigdecimal'
 require 'json'
 require 'net/http'
 require 'time'
+require 'uri'
 
 require_relative 'base'
 require_relative '../balance'
 require_relative '../currencies'
+require_relative '../request'
 require_relative '../transaction'
 
 module CoinSync
@@ -112,7 +114,7 @@ module CoinSync
         url = URI(BASE_URL + path)
         url.query = params.map { |k, v| "#{k}=#{v}" }.join('&')
 
-        Net::HTTP.get_response(url)
+        Request.get(url)
       end
     end
   end
