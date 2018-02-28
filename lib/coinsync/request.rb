@@ -1,6 +1,8 @@
 require 'net/http'
 require 'uri'
 
+require_relative 'version'
+
 module CoinSync
   module Request
     def self.get(url, &block)
@@ -18,6 +20,7 @@ module CoinSync
 
       Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
         request = request_type.new(url)
+        request['USER_AGENT'] = "coinsync/#{CoinSync::VERSION}"
 
         yield request if block_given?
 
