@@ -74,16 +74,16 @@ module CoinSync
             json = JSON.parse(response.body)
 
             if json.is_a?(Hash)
-              raise "Kucoin importer: Invalid response: #{response.body}"
+              raise "Binance importer: Invalid response: #{response.body}"
             end
 
             json.each { |tx| tx['symbol'] = pair }
 
             transactions.concat(json)
           when Net::HTTPBadRequest
-            raise "Kucoin importer: Bad request: #{response} (#{response.body})"
+            raise "Binance importer: Bad request: #{response} (#{response.body})"
           else
-            raise "Kucoin importer: Bad response: #{response}"
+            raise "Binance importer: Bad response: #{response}"
           end
         end
 
@@ -98,7 +98,7 @@ module CoinSync
           json = JSON.parse(response.body)
 
           if json['code'] || !json['balances']
-            raise "Kucoin importer: Invalid response: #{response.body}"
+            raise "Binance importer: Invalid response: #{response.body}"
           end
 
           return json['balances'].select { |b|
@@ -111,9 +111,9 @@ module CoinSync
             )
           }
         when Net::HTTPBadRequest
-          raise "Kucoin importer: Bad request: #{response}"
+          raise "Binance importer: Bad request: #{response}"
         else
-          raise "Kucoin importer: Bad response: #{response}"
+          raise "Binance importer: Bad response: #{response}"
         end
       end
 
