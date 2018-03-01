@@ -4,8 +4,10 @@ module CoinSync
   class Config
     attr_reader :settings
 
-    def self.load_from_file(filename)
-      yaml = YAML.load(File.read(filename))
+    DEFAULT_CONFIG = 'config.yml'
+
+    def self.load_from_file(filename = nil)
+      yaml = YAML.load(File.read(filename || DEFAULT_CONFIG))
       self.new(yaml)
     end
 

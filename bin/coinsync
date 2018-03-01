@@ -1,14 +1,23 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
+require 'optparse'
 
 require 'coinsync/config'
 require 'coinsync/balance_task'
 require 'coinsync/build_task'
 require 'coinsync/import_task'
 
-def load_config
-  CoinSync::Config.load_from_file('config.yml')
+def load_config(options)
+  CoinSync::Config.load_from_file(options[:config_file])
+end
+
+options = {}
+
+OptionParser.new do |opts|
+  opts.on('-cCONFIG', '--config CONFIG') { |c| options[:config_file] = c }
+
+  opts.parse!
 end
 
 command = ARGV.shift
@@ -22,18 +31,18 @@ when nil
   puts "  coinsync run - run the complete process"
 
 when 'balance'
-  task = CoinSync::BalanceTask.new(load_config)
+  task = CoinSync::BalanceTask.new(load_config(options))
   task.run
 
 when 'import'
   importers = ARGV.select { |a| !a.start_with?('^') }
   except = ARGV.select { |a| a.start_with?('^') }.map { |a| a.gsub(/^\^/, '') }
-  task = CoinSync::ImportTask.new(load_config)
+  task = CoinSync::ImportTask.new(load_config(options))
   task.run(importers, except)
 
 when 'build'
   output_name = ARGV.shift
-  task = CoinSync::BuildTask.new(load_config)
+  task = CoinSync::BuildTask.new(load_config(options))
   task.run(output_name)
 
 else
