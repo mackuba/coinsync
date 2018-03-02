@@ -84,12 +84,7 @@ module CoinSync
     include Amounts
 
     def initialize(number: nil, exchange:, bought_currency:, sold_currency:, time:, bought_amount:, sold_amount:)
-      if number.nil? || number.is_a?(Integer)
-        @number = number
-      else
-        raise "Transaction: '#{number}' is not an integer"
-      end
-
+      @number = number
       @exchange = exchange
 
       if time.is_a?(Time)
