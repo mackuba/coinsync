@@ -73,10 +73,14 @@ module CoinSync
         entry.asset = CryptoCurrency.new(line[5])
         entry.total = @formatter.parse_decimal(line[6])
 
-        entry.currency = if line[7].start_with?('$')
+        entry.currency = if line[7].to_s.start_with?('$')
           CryptoCurrency.new(line[7][1..-1])
         else
           FiatCurrency.new(line[7])
+        end
+
+        if entry.currency.code.nil? && entry.total > 0
+          raise "Default importer error: Currency must be specified if total value is non-zero"
         end
 
         entry
