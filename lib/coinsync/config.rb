@@ -1,8 +1,10 @@
 require 'yaml'
 
+require_relative 'source'
+
 module CoinSync
   class Config
-    attr_reader :settings
+    attr_reader :source_definitions, :settings
 
     DEFAULT_CONFIG = 'config.yml'
 
@@ -12,7 +14,7 @@ module CoinSync
     end
 
     def initialize(yaml)
-      @sources = yaml['sources'] or raise 'Config: No sources listed'
+      @source_definitions = yaml['sources'] or raise 'Config: No sources listed'
       @settings = yaml['settings'] || {}
       @labels = @settings['labels'] || {}
 
@@ -26,32 +28,7 @@ module CoinSync
     end
 
     def sources
-      @importers ||= @sources.map do |key, params|
-        if params.is_a?(Hash)
-          filename = params['file']
-          importer_params = params
-          type = (params['type'] || key).to_sym
-        else
-          filename = params
-          importer_params = {}
-          type = key.to_sym
-        end
-
-        importer_class = Importers.registered[type]
-
-        if importer_class.nil?
-          if importer_params['type']
-            raise "Unknown source type for '#{key}': #{params['type']}"
-          else
-            raise "Unknown source type for '#{key}': please include a 'type' parameter " +
-              "or use a name of an existing importer"
-          end
-        end
-
-        importer = importer_class.new(self, importer_params)
-
-        [importer, key, importer_params, filename]
-      end
+      @sources ||= @source_definitions.keys.map { |key| Source.new(self, key) }
     end
 
     def set_timezone(timezone)

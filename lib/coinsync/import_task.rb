@@ -15,17 +15,21 @@ module CoinSync
         selected = [selected] unless selected.is_a?(Array)
 
         selected.map do |searched_key|
-          found = @config.sources.detect { |importer, key, params, filename| key == searched_key }
+          found = @config.sources.detect { |source| source.key == searched_key }
           found or raise "Source not found in the config file: '#{searched_key}'"
         end
       end
 
       if except
         except = [except] unless except.is_a?(Array)
-        sources = sources.reject { |importer, key, params, filename| except.include?(key) }
+        sources = sources.reject { |source| except.include?(source.key) }
       end
 
-      sources.each do |importer, key, params, filename|
+      sources.each do |source|
+        importer = source.importer
+        key = source.key
+        filename = source.filename
+
         if importer.respond_to?(:can_import?)
           if importer.can_import?
             if filename.nil?

@@ -14,7 +14,10 @@ module CoinSync
       columns = []
       rows = []
 
-      @config.sources.each do |importer, key, params, filename|
+      @config.sources.each do |source|
+        importer = source.importer
+        key = source.key
+
         if importer.respond_to?(:can_import?)
           if importer.can_import?
             print "[#{key}] Importing balances... "

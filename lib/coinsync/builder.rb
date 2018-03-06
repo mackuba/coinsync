@@ -11,13 +11,13 @@ module CoinSync
     def build_transaction_list
       transactions = []
 
-      @config.sources.each do |importer, key, params, filename|
-        if filename.nil?
-          raise "No filename specified for '#{key}', please add a 'file' parameter."
+      @config.sources.each do |source|
+        if source.filename.nil?
+          raise "No filename specified for '#{source.key}', please add a 'file' parameter."
         end
 
-        File.open(filename, 'r') do |file|
-          transactions.concat(importer.read_transaction_list(file))
+        File.open(source.filename, 'r') do |file|
+          transactions.concat(source.importer.read_transaction_list(file))
         end
       end
 
