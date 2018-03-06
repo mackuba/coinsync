@@ -40,4 +40,4 @@ module CoinSync
       @importer ||= @importer_class.new(@config, @params)
     end
   end
-end 
+end

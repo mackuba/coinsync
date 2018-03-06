@@ -10,19 +10,18 @@ module CoinSync
 
     def run(selected = nil, except = nil)
       sources = if selected.nil? || selected.empty?
-        @config.sources
+        @config.sources.values
       else
         selected = [selected] unless selected.is_a?(Array)
 
-        selected.map do |searched_key|
-          found = @config.sources.detect { |source| source.key == searched_key }
-          found or raise "Source not found in the config file: '#{searched_key}'"
+        selected.map do |key|
+          @config.sources[key] or raise "Source not found in the config file: '#{key}'"
         end
       end
 
       if except
         except = [except] unless except.is_a?(Array)
-        sources = sources.reject { |source| except.include?(source.key) }
+        sources -= except.map { |key| @config.sources[key] }
       end
 
       sources.each do |source|

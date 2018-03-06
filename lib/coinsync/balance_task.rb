@@ -14,9 +14,8 @@ module CoinSync
       columns = []
       rows = []
 
-      @config.sources.each do |source|
+      @config.sources.each do |key, source|
         importer = source.importer
-        key = source.key
 
         if importer.respond_to?(:can_import?)
           if importer.can_import?

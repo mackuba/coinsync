@@ -28,7 +28,7 @@ module CoinSync
     end
 
     def sources
-      @sources ||= @source_definitions.keys.map { |key| Source.new(self, key) }
+      @sources ||= Hash[@source_definitions.keys.map { |key| [key, Source.new(self, key)] }]
     end
 
     def set_timezone(timezone)

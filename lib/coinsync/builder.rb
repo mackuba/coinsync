@@ -11,9 +11,9 @@ module CoinSync
     def build_transaction_list
       transactions = []
 
-      @config.sources.each do |source|
+      @config.sources.each do |key, source|
         if source.filename.nil?
-          raise "No filename specified for '#{source.key}', please add a 'file' parameter."
+          raise "No filename specified for '#{key}', please add a 'file' parameter."
         end
 
         File.open(source.filename, 'r') do |file|
