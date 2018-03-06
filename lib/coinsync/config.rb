@@ -21,6 +21,8 @@ module CoinSync
           require(File.expand_path(File.join('.', file)))
         end
       end
+
+      set_timezone(timezone) if timezone
     end
 
     def sources
@@ -52,6 +54,10 @@ module CoinSync
       end
     end
 
+    def set_timezone(timezone)
+      ENV['TZ'] = timezone
+    end
+
     def base_cryptocurrencies
       settings['base_cryptocurrencies'] || ['USDT', 'BTC', 'ETH', 'BNB', 'KCS', 'LTC', 'BCH', 'NEO']
     end
@@ -78,6 +84,10 @@ module CoinSync
 
     def time_format
       settings['time_format']
+    end
+
+    def timezone
+      settings['timezone']
     end
 
     def translate(label)
