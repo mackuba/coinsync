@@ -32,8 +32,9 @@ when nil
   puts "  coinsync run - run the complete process"
 
 when 'balance'
+  selected, except = CoinSync::SourceFilter.new.parse_command_line_args(ARGV)
   task = CoinSync::BalanceTask.new(load_config(options))
-  task.run
+  task.run(selected, except)
 
 when 'import'
   selected, except = CoinSync::SourceFilter.new.parse_command_line_args(ARGV)
