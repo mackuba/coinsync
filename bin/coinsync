@@ -7,6 +7,7 @@ require 'coinsync/config'
 require 'coinsync/balance_task'
 require 'coinsync/build_task'
 require 'coinsync/import_task'
+require 'coinsync/source_filter'
 
 def load_config(options)
   CoinSync::Config.load_from_file(options[:config_file])
@@ -35,10 +36,9 @@ when 'balance'
   task.run
 
 when 'import'
-  importers = ARGV.select { |a| !a.start_with?('^') }
-  except = ARGV.select { |a| a.start_with?('^') }.map { |a| a.gsub(/^\^/, '') }
+  selected, except = CoinSync::SourceFilter.new.parse_command_line_args(ARGV)
   task = CoinSync::ImportTask.new(load_config(options))
-  task.run(importers, except)
+  task.run(selected, except)
 
 when 'build'
   output_name = ARGV.shift
