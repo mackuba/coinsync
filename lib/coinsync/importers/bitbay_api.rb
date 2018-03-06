@@ -169,7 +169,7 @@ module CoinSync
               matching.clear
 
               return Transaction.new(
-                exchange: 'BitBay3',
+                exchange: 'BitBay',
                 bought_currency: bought_currency.first,
                 sold_currency: sold_currency.first,
                 time: (purchases + sales + fees).map(&:date).last,
