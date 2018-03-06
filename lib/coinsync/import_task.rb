@@ -9,24 +9,8 @@ module CoinSync
     end
 
     def run(selected = nil, except = nil)
-      sources = if selected.nil? || selected.empty?
-        @config.sources.values
-      else
-        selected = [selected] unless selected.is_a?(Array)
-
-        selected.map do |key|
-          @config.sources[key] or raise "Source not found in the config file: '#{key}'"
-        end
-      end
-
-      if except
-        except = [except] unless except.is_a?(Array)
-        sources -= except.map { |key| @config.sources[key] }
-      end
-
-      sources.each do |source|
+      @config.filtered_sources(selected, except).each do |key, source|
         importer = source.importer
-        key = source.key
         filename = source.filename
 
         if importer.respond_to?(:can_import?)
