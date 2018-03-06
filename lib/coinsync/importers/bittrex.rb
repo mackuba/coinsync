@@ -32,13 +32,18 @@ module CoinSync
 
       def read_transaction_list(source)
         contents = source.read.gsub("\u0000", '').gsub("\r", '')
+        entries = []
         transactions = []
 
         CSV.parse(contents, col_sep: ',') do |line|
           next if line[0] == 'OrderUuid'
 
-          entry = HistoryEntry.new(line)
+          entries << HistoryEntry.new(line)
+        end
 
+        entries.sort_by! { |e| [e.time_closed, e.uuid] }
+
+        entries.each do |entry|
           case entry.type
           when 'LIMIT_BUY', 'MARKET_BUY' then
             transactions << Transaction.new(
@@ -63,9 +68,7 @@ module CoinSync
           end
         end
 
-        transactions.each_with_index { |tx, i| tx.number = i }
-
-        transactions.sort_by { |tx| [tx.time, tx.number] }
+        transactions
       end
     end
   end
