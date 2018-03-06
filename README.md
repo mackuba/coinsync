@@ -69,10 +69,10 @@ The config uses the [YAML format](http://yaml.org), and the expected structure i
 sources:
   bittrex:
     type: bittrex
-    file: bittrex.csv
+    file: data/bittrex.csv
   kraken:
     type: kraken
-    file: kraken-ledgers.csv
+    file: data/kraken-ledgers.csv
   bitbay_api:
     file: data/bitbay.json
     api_public_key: 12345-678-90abc
