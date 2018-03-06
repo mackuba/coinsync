@@ -218,7 +218,7 @@ IOTA             1800
 
 #### Custom build tasks
 
-You can output a compiled transactions list in any other format you specifically need, by creating a custom importer class inheriting from `CoinSync::Outputs::Base` based on the [provided output classes](lib/coinsync/outputs) and loading it with the `include` option in the config.
+You can output a compiled transactions list in any other format you specifically need, by creating a custom output class inheriting from `CoinSync::Outputs::Base` based on the [provided output classes](lib/coinsync/outputs) and loading it with the `include` option in the config.
 
 
 ## Credits & contributing
