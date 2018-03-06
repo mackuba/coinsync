@@ -26,10 +26,25 @@ command = ARGV.shift
 case command
 when nil
   puts "Usage:"
-  puts "  coinsync import - import transaction logs from exchanges"
-  puts "  coinsync build - build the input csv from exchange logs"
-  puts "  coinsync process - generate the output csv from the input"
-  puts "  coinsync run - run the complete process"
+  puts "  coinsync balance [source1 source2 ^excluded_source...]"
+  puts "    - imports and prints wallet balances from all or selected sources"
+  puts
+  puts "  coinsync import [source1 source2 ^excluded_source...]"
+  puts "    - imports transaction histories from all or selected sources to files listed in the config"
+  puts
+  puts "  coinsync build list"
+  puts "    - merges all transaction histories into a single list and saves it to build/list.csv"
+  puts
+  puts "  coinsync build fifo"
+  puts "    - merges all transaction histories into a single list, calculates transaction"
+  puts "      profits using FIFO and saves the result to build/fifo.csv"
+  puts
+  puts "  coinsync build summary"
+  puts "    - merges all transaction histories into a single list and calculates how many"
+  puts "      units of each token you should have in total now"
+  puts
+  puts "  * add -c file.yml / --config file.yml to use a custom config path instead of config.yml"
+  puts
 
 when 'balance'
   selected, except = CoinSync::SourceFilter.new.parse_command_line_args(ARGV)
