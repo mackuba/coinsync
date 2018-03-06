@@ -58,6 +58,16 @@ bundle exec coinsync
 
 This also lets you install the gem locally in that directory, by adding a path argument to `bundle`, e.g. `bundle --path ./bundle`.
 
+### Installing development version
+
+To use the latest development version, check out the repository to a local directory:
+
+```
+git clone git@github.com:mackuba/coinsync.git
+```
+
+And then run `bin/coinsync` from inside that directory.
+
 
 ## Configuration
 
