@@ -14,6 +14,7 @@ module CoinSync
   module Importers
     class BinanceAPI < Base
       register_importer :binance_api
+      register_commands :find_all_pairs
 
       BASE_URL = "https://api.binance.com/api"
       BASE_COINS = ['BTC', 'ETH', 'BNB', 'USDT']
@@ -117,6 +118,41 @@ module CoinSync
         end
       end
 
+      def find_all_pairs
+        info_response = make_request('/v1/exchangeInfo', {}, false)
+
+        if !info_response.is_a?(Net::HTTPSuccess)
+          raise "Binance importer: Bad request: #{info_response}"
+        end
+
+        info_json = JSON.parse(info_response.body)
+
+        found = []
+
+        info_json['symbols'].each do |data|
+          symbol = data['symbol']
+          trades_response = make_request('/v3/myTrades', limit: 1, symbol: symbol)
+
+          case trades_response
+          when Net::HTTPSuccess
+            trades_json = JSON.parse(trades_response.body)
+
+            if trades_json.length > 0
+              print '*'
+              found << symbol
+            else
+              print '.'
+            end
+          else
+            raise "Binance importer: Bad response: #{trades_response}"
+          end
+        end
+
+        puts
+        puts "Trading pairs found:"
+        puts found.sort
+      end
+
       def read_transaction_list(source)
         json = JSON.parse(source.read)
         transactions = []
@@ -150,16 +186,20 @@ module CoinSync
 
       private
 
-      def make_request(path, params = {})
-        (@api_key && @secret_key) or raise "Public and secret API keys must be provided"
+      def make_request(path, params = {}, signed = true)
+        if signed
+          (@api_key && @secret_key) or raise "Public and secret API keys must be provided"
 
-        params['timestamp'] = (Time.now.to_f * 1000).to_i
+          params['timestamp'] = (Time.now.to_f * 1000).to_i
+        end
 
         url = URI(BASE_URL + path)
         url.query = URI.encode_www_form(params)
 
-        hmac = OpenSSL::HMAC.hexdigest('sha256', @secret_key, url.query)
-        url.query += "&signature=#{hmac}"
+        if signed
+          hmac = OpenSSL::HMAC.hexdigest('sha256', @secret_key, url.query)
+          url.query += "&signature=#{hmac}"
+        end
 
         Request.get(url) do |request|
           request['X-MBX-APIKEY'] = @api_key
