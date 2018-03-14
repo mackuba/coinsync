@@ -221,6 +221,15 @@ IOTA             1800
 You can output a compiled transactions list in any other format you specifically need, by creating a custom output class inheriting from `CoinSync::Outputs::Base` based on the [provided output classes](lib/coinsync/outputs) and loading it with the `include` option in the config.
 
 
+### Run command
+
+```
+coinsync run <source> <command> [args...]
+```
+
+Some importers (currently only Binance) may have custom commands implemented that only make sense for a given importer. This allows you to run these commands from the command line. See the ["Exchanges"](doc/exchanges.md) doc for more info.
+
+
 ## Credits & contributing
 
 Copyright © 2018 [Kuba Suder](https://mackuba.eu). Licensed under [MIT License](http://opensource.org/licenses/MIT).

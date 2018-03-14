@@ -35,6 +35,13 @@ traded_pairs:
   - LTCUSDT
 ```
 
+The Binance importer has a custom command that you can use to generate this list. This task scans all available trading pairs and finds those with some trades present on your account. It may take about 5-10 minutes to complete, that's why this isn't done automatically during the import.
+
+```
+coinsync run binance_api find_all_pairs
+```
+
+
 ### BitBay API (`bitbay_api`)
 
 Connects to the API: **YES**
