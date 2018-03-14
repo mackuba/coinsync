@@ -10,17 +10,18 @@ module CoinSync
 
     def self.load_from_file(filename = nil)
       yaml = YAML.load(File.read(filename || DEFAULT_CONFIG))
-      self.new(yaml)
+      self.new(yaml, filename)
     end
 
-    def initialize(yaml)
+    def initialize(yaml, config_path = nil)
       @source_definitions = yaml['sources'] or raise 'Config: No sources listed'
       @settings = yaml['settings'] || {}
       @labels = @settings['labels'] || {}
 
       if includes = yaml['include']
         includes.each do |file|
-          require(File.expand_path(File.join('.', file)))
+          directory = config_path ? [config_path, '..'] : ['.']
+          require(File.expand_path(File.join(*directory, file)))
         end
       end
 
