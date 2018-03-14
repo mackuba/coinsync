@@ -122,7 +122,7 @@ module CoinSync
         info_response = make_request('/v1/exchangeInfo', {}, false)
 
         if !info_response.is_a?(Net::HTTPSuccess)
-          raise "Binance importer: Bad request: #{info_response}"
+          raise "Binance importer: Bad response: #{info_response.body}"
         end
 
         info_json = JSON.parse(info_response.body)
@@ -144,7 +144,7 @@ module CoinSync
               print '.'
             end
           else
-            raise "Binance importer: Bad response: #{trades_response}"
+            raise "Binance importer: Bad response: #{trades_response.body}"
           end
         end
 
