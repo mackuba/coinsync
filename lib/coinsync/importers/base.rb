@@ -13,6 +13,15 @@ module CoinSync
         end
       end
 
+      def self.register_commands(*commands)
+        @commands ||= []
+        @commands += commands.map(&:to_sym)
+      end
+
+      def self.registered_commands
+        @commands || []
+      end
+
       def initialize(config, params = {})
         @config = config
         @params = params

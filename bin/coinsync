@@ -7,6 +7,7 @@ require 'coinsync/config'
 require 'coinsync/balance_task'
 require 'coinsync/build_task'
 require 'coinsync/import_task'
+require 'coinsync/run_command_task'
 require 'coinsync/source_filter'
 
 def load_config(options)
@@ -43,6 +44,9 @@ when nil
   puts "    - merges all transaction histories into a single list and calculates how many"
   puts "      units of each token you should have in total now"
   puts
+  puts "  coinsync run <source> <command> [args]"
+  puts "    - executes a custom action from one of the configured importers (see docs for more info)"
+  puts
   puts "  * add -c file.yml / --config file.yml to use a custom config path instead of config.yml"
   puts
 
@@ -60,6 +64,13 @@ when 'build'
   output_name = ARGV.shift
   task = CoinSync::BuildTask.new(load_config(options))
   task.run(output_name)
+
+when 'run'
+  source = ARGV.shift or (puts "Usage: coinsync run <source> <command> [args]"; exit 1)
+  command = ARGV.shift or (puts "Usage: coinsync run <source> <command> [args]"; exit 1)
+
+  task = CoinSync::RunCommandTask.new(load_config(options))
+  task.run(source, command, ARGV)
 
 else
   raise "Unknown command #{command}"
