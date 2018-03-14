@@ -8,8 +8,8 @@ require_relative '../transaction'
 
 module CoinSync
   module Importers
-    class Kraken < Base
-      register_importer :kraken
+    class KrakenCSV < Base
+      register_importer :kraken_csv
 
       class LedgerEntry
         attr_accessor :txid, :refid, :time, :type, :aclass, :asset, :amount, :fee, :balance
