@@ -9,12 +9,6 @@ module CoinSync
     class List < Base
       register_output :list
 
-      def initialize(config, target_file)
-        super
-        @formatter = Formatter.new(config)
-        @classifier = CryptoClassifier.new(config)
-      end
-
       def requires_currency_conversion?
         true
       end

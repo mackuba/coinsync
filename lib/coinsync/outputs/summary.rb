@@ -10,11 +10,6 @@ module CoinSync
     class Summary < Base
       register_output :summary
 
-      def initialize(config, target_file)
-        super
-        @formatter = Formatter.new(@config)
-      end
-
       def requires_currency_conversion?
         false
       end

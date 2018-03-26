@@ -16,6 +16,9 @@ module CoinSync
       def initialize(config, target_file)
         @config = config
         @target_file = target_file
+
+        @formatter = Formatter.new(config)
+        @classifier = CryptoClassifier.new(config)
       end
 
       def requires_currency_conversion?

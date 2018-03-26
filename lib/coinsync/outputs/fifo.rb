@@ -48,11 +48,6 @@ module CoinSync
         end
       end
 
-      def initialize(config, target_file)
-        super
-        @formatter = Formatter.new(config)
-      end
-
       def requires_currency_conversion?
         true
       end

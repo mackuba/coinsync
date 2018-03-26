@@ -8,11 +8,6 @@ module CoinSync
     class Raw < Base
       register_output :raw
 
-      def initialize(config, target_file)
-        super
-        @formatter = Formatter.new(config)
-      end
-
       def process_transactions(transactions, *args)
         CSV.open(@target_file, 'w', col_sep: @config.column_separator) do |csv|
           csv << headers
