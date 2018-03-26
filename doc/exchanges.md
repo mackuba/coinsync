@@ -74,7 +74,20 @@ Parameters:
 
 This is used to import transaction history from the late Polish Bitcurex exchange (RIP in peace), in case you happen to have downloaded one before the owners disappeared with all the money.
 
-### Bittrex (`bittrex`)
+### Bittrex API (`bittrex_api`)
+
+Connects to the API: **YES**
+
+Parameters:
+
+- api_key: API public key
+- api_secret: API secret key
+
+Note: this importer can **only** import wallet balances. Unfortunately, the "get order history" endpoint in the Bittrex API has the same problem as the "Orders" page on your profile page: it only lists orders from last month or so, and any older orders are cleaned up. This makes it pretty much useless for our purposes. The only way to download a complete transaction history seems to be by manually pressing the (captcha-protected) "Load All" button on the site, which returns a CSV file that can be parsed with the `bittrex_csv` importer.
+
+The API key can be created on your Bittrex profile page - you only need the "Read Info" permission.
+
+### Bittrex CSV (`bittrex_csv`)
 
 Connects to the API: **NO**
 
@@ -140,7 +153,19 @@ Parameters:
 
 To download a transaction history, use the [DeltaBalances tool](https://deltabalances.github.io), look up your transactions on the History page specifying the time range you need, and then download the "Default" CSV in the top-right section.
 
-### Kraken (`kraken`)
+### Kraken API (`kraken_api`)
+
+Connects to the API: **YES**
+
+Parameters:
+
+- file: path where the transaction history will be saved
+- api_key: API public key
+- private_key: API secret key
+
+Create the API key on your Kraken profile page. Select the "Query Funds" permission to import balances and "Query Ledger Entries" to import transactions.
+
+### Kraken CSV (`kraken_csv`)
 
 Connects to the API: **NO**
 
