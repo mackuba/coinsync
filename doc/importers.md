@@ -83,7 +83,7 @@ Parameters:
 - api_key: API public key
 - api_secret: API secret key
 
-Note: this importer can **only** import wallet balances. Unfortunately, the "get order history" endpoint in the Bittrex API has the same problem as the "Orders" page on your profile page: it only lists orders from last month or so, and any older orders are cleaned up. This makes it pretty much useless for our purposes. The only way to download a complete transaction history seems to be by manually pressing the (captcha-protected) "Load All" button on the site, which returns a CSV file that can be parsed with the `bittrex_csv` importer.
+Note: this importer can **_only_** import wallet balances. Unfortunately, the "get order history" endpoint in the Bittrex API has the same problem as the "Orders" page on your profile page: it only lists orders from last month or so, and any older orders are cleaned up. This makes it pretty much useless for our purposes. The only way to download a complete transaction history seems to be by manually pressing the (captcha-protected) "Load All" button on the site, which returns a CSV file that can be parsed with the `bittrex_csv` importer.
 
 The API key can be created on your Bittrex profile page - you only need the "Read Info" permission.
 
