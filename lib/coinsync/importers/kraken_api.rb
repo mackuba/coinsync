@@ -90,9 +90,11 @@ module CoinSync
           end
 
           return json['result'].map { |k, v|
-            Balance.new(CryptoCurrency.new(k), available: BigDecimal.new(v))
-          }.select { |b|
-            b.available > 0
+            [Kraken::LedgerEntry.parse_currency(k), BigDecimal.new(v)]
+          }.select { |currency, amount|
+            amount > 0 && currency.crypto?
+          }.map { |currency, amount|
+            Balance.new(currency, available: amount)
           }
         when Net::HTTPBadRequest
           raise "Kraken importer: Bad request: #{response.body}"
