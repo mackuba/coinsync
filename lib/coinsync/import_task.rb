@@ -14,7 +14,7 @@ module CoinSync
         filename = source.filename
 
         if importer.respond_to?(:can_import?)
-          if importer.can_import?
+          if importer.can_import?(:transactions)
             if filename.nil?
               raise "No filename specified for '#{key}', please add a 'file' parameter."
             end

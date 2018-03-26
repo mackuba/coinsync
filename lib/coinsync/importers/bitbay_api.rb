@@ -75,8 +75,8 @@ module CoinSync
         @secret_key = params['api_private_key']
       end
 
-      def can_import?
-        !(@public_key.nil? || @secret_key.nil?)
+      def can_import?(type)
+        @public_key && @secret_key && [:balances, :transactions].include?(type)
       end
 
       def import_transactions(filename)

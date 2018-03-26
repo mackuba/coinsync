@@ -33,8 +33,8 @@ module CoinSync
         @address = params['address']
       end
 
-      def can_import?
-        !!@address
+      def can_import?(type)
+        @address && [:balances, :transactions].include?(type)
       end
 
       def import_transactions(filename)

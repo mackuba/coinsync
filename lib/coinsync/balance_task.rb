@@ -18,7 +18,7 @@ module CoinSync
         importer = source.importer
 
         if importer.respond_to?(:can_import?)
-          if importer.can_import?
+          if importer.can_import?(:balances)
             print "[#{key}] Importing balances... "
 
             columns << key

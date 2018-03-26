@@ -28,8 +28,8 @@ module CoinSync
         @decoded_secret = Base64.decode64(@secret_api_key) if @secret_api_key
       end
 
-      def can_import?
-        !(@api_key.nil? || @secret_api_key.nil?)
+      def can_import?(type)
+        @api_key && @secret_api_key && [:balances, :transactions].include?(type)
       end
 
       def import_transactions(filename)

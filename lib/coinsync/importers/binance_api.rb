@@ -58,8 +58,8 @@ module CoinSync
         @traded_pairs = params['traded_pairs']
       end
 
-      def can_import?
-        !(@api_key.nil? || @secret_key.nil?)
+      def can_import?(type)
+        @api_key && @secret_key && [:balances, :transactions].include?(type)
       end
 
       def import_transactions(filename)
