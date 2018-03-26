@@ -115,7 +115,7 @@ If the type of the importer is the same as the source key, the `type` parameter 
 
     kraken: kraken-ledgers.csv
 
-See the separate ["Exchanges"](doc/exchanges.md) doc file for a full list of supported exchanges.
+See the separate ["Importers"](doc/importers.md) doc file for a full list of supported exchanges.
 
 ### Settings
 
@@ -227,7 +227,7 @@ You can output a compiled transactions list in any other format you specifically
 coinsync run <source> <command> [args...]
 ```
 
-Some importers (currently only Binance) may have custom commands implemented that only make sense for a given importer. This allows you to run these commands from the command line. See the ["Exchanges"](doc/exchanges.md) doc for more info.
+Some importers (currently only Binance) may have custom commands implemented that only make sense for a given importer. This allows you to run these commands from the command line. See the ["Importers"](doc/importers.md) doc for more info.
 
 
 ## Credits & contributing
