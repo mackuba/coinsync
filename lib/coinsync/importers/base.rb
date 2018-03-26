@@ -26,6 +26,10 @@ module CoinSync
         @config = config
         @params = params
       end
+
+      def can_build?
+        true
+      end
     end
   end
 end

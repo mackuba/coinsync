@@ -12,12 +12,14 @@ module CoinSync
       transactions = []
 
       @config.sources.each do |key, source|
-        if source.filename.nil?
-          raise "No filename specified for '#{key}', please add a 'file' parameter."
-        end
+        if source.importer.can_build?
+          if source.filename.nil?
+            raise "No filename specified for '#{key}', please add a 'file' parameter."
+          end
 
-        File.open(source.filename, 'r') do |file|
-          transactions.concat(source.importer.read_transaction_list(file))
+          File.open(source.filename, 'r') do |file|
+            transactions.concat(source.importer.read_transaction_list(file))
+          end
         end
       end
 
