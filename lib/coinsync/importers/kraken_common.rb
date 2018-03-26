@@ -40,16 +40,35 @@ module CoinSync
         def self.parse_currency(code)
           case code
           when 'BCH' then CryptoCurrency.new('BCH')
+          when 'DASH' then CryptoCurrency.new('DASH')
+          when 'EOS' then CryptoCurrency.new('EOS')
+          when 'GNO' then CryptoCurrency.new('GNO')
+          when 'KFEE' then CryptoCurrency.new('KFEE')
+          when 'USDT' then CryptoCurrency.new('USDT')
+
+          when 'XDAO' then CryptoCurrency.new('DAO')
           when 'XETC' then CryptoCurrency.new('ETC')
           when 'XETH' then CryptoCurrency.new('ETH')
           when 'XICN' then CryptoCurrency.new('ICN')
           when 'XLTC' then CryptoCurrency.new('LTC')
+          when 'XMLN' then CryptoCurrency.new('MLN')
+          when 'XNMC' then CryptoCurrency.new('NMC')
+          when 'XREP' then CryptoCurrency.new('REP')
           when 'XXBT' then CryptoCurrency.new('BTC')
+          when 'XXDG' then CryptoCurrency.new('DOGE')
           when 'XXLM' then CryptoCurrency.new('XLM')
           when 'XXMR' then CryptoCurrency.new('XMR')
           when 'XXRP' then CryptoCurrency.new('XRP')
+          when 'XXVN' then CryptoCurrency.new('VEN')
+          when 'XZEC' then CryptoCurrency.new('ZEC')
+
+          when 'ZCAD' then FiatCurrency.new('CAD')
           when 'ZEUR' then FiatCurrency.new('EUR')
+          when 'ZGBP' then FiatCurrency.new('GBP')
+          when 'ZJPY' then FiatCurrency.new('JPY')
+          when 'ZKRW' then FiatCurrency.new('KRW')
           when 'ZUSD' then FiatCurrency.new('USD')
+
           else raise "Unknown currency: #{code}"
           end
         end
