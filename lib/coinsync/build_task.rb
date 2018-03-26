@@ -30,7 +30,7 @@ module CoinSync
 
       output = output_class.new(@config, "build/#{output_name}.csv")
 
-      if output.respond_to?(:requires_currency_conversion?) && output.requires_currency_conversion?
+      if output.requires_currency_conversion?
         if @config.convert_to_currency
           converter = CoinSync::CurrencyConverter.new(@config)
           converter.process_transactions(transactions)

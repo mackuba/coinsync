@@ -17,6 +17,10 @@ module CoinSync
         @config = config
         @target_file = target_file
       end
+
+      def requires_currency_conversion?
+        false
+      end
     end
   end
 end

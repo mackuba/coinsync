@@ -189,6 +189,26 @@ coinsync build list
 This will just print all your transactions to a single unified CSV file (in `build/list.csv`).
 
 
+#### Build Raw
+
+```
+coinsync build raw
+```
+
+This prints a list of transactions in a way similar to `build list`, but in the same format as CoinSync stores transactions internally in memory: each transaction, no matter the type or source, is stored in exactly the same way - the amount and code of the fiat or crypto currency received (bought) and the amount & code of the fiat/crypto currency paid (sold). This means that when e.g. buying BTC for USD, the bought currency will be BTC and the sold one will be USD, and when selling BTC for USD, it will be the other way around (bought: USD, sold: BTC).
+
+This output is mostly meant if you intend to use it as input for some other tools written in other languages and process the data further there.
+
+The columns in the CSV are:
+
+- exchange: name of the exchange or source
+- date: transaction date
+- bought amount: amount of the bought (received) asset/currency
+- bought currency: code of the bought (received) asset/currency
+- sold amount: amount of the asset/currency you sold (paid in)
+- sold currency: code of the asset/currency you sold (paid in)
+
+
 #### Build FIFO
 
 ```
