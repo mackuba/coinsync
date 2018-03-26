@@ -63,7 +63,7 @@ when 'import'
 when 'build'
   output_name = ARGV.shift
   task = CoinSync::BuildTask.new(load_config(options))
-  task.run(output_name)
+  task.run(output_name, ARGV)
 
 when 'run'
   source = ARGV.shift or (puts "Usage: coinsync run <source> <command> [args]"; exit 1)

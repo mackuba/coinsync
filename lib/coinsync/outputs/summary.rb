@@ -19,7 +19,7 @@ module CoinSync
         false
       end
 
-      def process_transactions(transactions)
+      def process_transactions(transactions, *args)
         totals = Hash.new { BigDecimal(0) }
 
         transactions.each do |tx|

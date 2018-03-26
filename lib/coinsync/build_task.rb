@@ -10,7 +10,7 @@ module CoinSync
       @config = config
     end
 
-    def run(output_name)
+    def run(output_name, args = [])
       if output_name.nil?
         puts "Error: Build task name not given"
         exit 1
@@ -37,7 +37,7 @@ module CoinSync
         end
       end
 
-      output.process_transactions(transactions)
+      output.process_transactions(transactions, *args)
     end
   end
 end

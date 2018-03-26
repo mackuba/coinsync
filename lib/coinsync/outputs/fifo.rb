@@ -57,7 +57,7 @@ module CoinSync
         true
       end
 
-      def process_transactions(transactions)
+      def process_transactions(transactions, *args)
         years = {}
 
         CSV.open(@target_file, 'w', col_sep: @config.column_separator) do |csv|
