@@ -9,10 +9,10 @@ module CoinSync
 
     class Base
       def self.register_output(key)
-        if Outputs.registered[key]
+        if Outputs.registered[key.to_sym]
           raise "Output has already been registered at '#{key}'"
         else
-          Outputs.registered[key] = self
+          Outputs.registered[key.to_sym] = self
         end
       end
 

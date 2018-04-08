@@ -12,6 +12,7 @@ require "coinsync/request"
 require "coinsync/run_command_task"
 require "coinsync/source"
 require "coinsync/transaction"
+require "coinsync/utils"
 require "coinsync/version"
 
 module CoinSync

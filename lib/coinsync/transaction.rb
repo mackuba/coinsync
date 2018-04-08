@@ -105,7 +105,7 @@ module CoinSync
         raise "Transaction: '#{bought_currency}' is not a valid currency"
       end
 
-      (bought_amount > 0) or raise "Transaction: bought_amount should be positive (#{bought_amount})"
+      (bought_amount >= 0) or raise "Transaction: bought_amount should not be negative (#{bought_amount})"
 
       if sold_amount.is_a?(BigDecimal)
         @sold_amount = sold_amount
