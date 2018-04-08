@@ -2,7 +2,6 @@ require 'bigdecimal'
 
 require_relative 'base'
 require_relative '../currencies'
-require_relative '../formatter'
 require_relative '../table_printer'
 
 module CoinSync

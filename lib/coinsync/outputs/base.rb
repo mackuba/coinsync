@@ -1,3 +1,6 @@
+require_relative '../crypto_classifier'
+require_relative '../formatter'
+
 module CoinSync
   module Outputs
     def self.registered

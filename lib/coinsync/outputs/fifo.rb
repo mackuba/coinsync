@@ -2,7 +2,6 @@ require 'bigdecimal'
 require 'csv'
 
 require_relative 'base'
-require_relative '../formatter'
 require_relative '../table_printer'
 require_relative '../transaction'
 
