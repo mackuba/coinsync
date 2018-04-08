@@ -34,7 +34,7 @@ module CoinSync
 
           entry = parse_line(line)
 
-          if entry.type == 'Purchase'
+          if entry.type.downcase == Transaction::TYPE_PURCHASE.to_s
             transactions << Transaction.new(
               exchange: entry.exchange,
               bought_currency: entry.asset,
@@ -43,7 +43,7 @@ module CoinSync
               bought_amount: entry.amount,
               sold_amount: entry.total
             )
-          elsif entry.type == 'Sale'
+          elsif entry.type.downcase == Transaction::TYPE_SALE.to_s
             transactions << Transaction.new(
               exchange: entry.exchange,
               bought_currency: entry.currency,
