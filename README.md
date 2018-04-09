@@ -130,6 +130,16 @@ See the separate ["Importers"](doc/importers.md) doc file for a full list of sup
 If you want to extend the tool with support for additional importers, build tasks, currency converters etc., you can add an `include` key to the config and list there any local Ruby files you want to be loaded when CoinSync runs.
 
 
+### Currency conversion
+
+If you make transactions in multiple fiat currencies (e.g. USD on Bitfinex, EUR on Kraken) and you want to have all values converted to one currency (for example, to calculate profits for tax purposes), use the `convert_to` and `convert_with` options in the settings. Currency conversion is done using pluggable modules that load currency rates from specific sources. Currently, two are available:
+
+- `fixer` loads exchange rates from [fixer.io](http://fixer.io) API (note: they've now decided to deprecate this API in June and the new one requires an API key, let me know if you know any better option)
+- `nbp` loads rates from [Polish National Bank](http://www.nbp.pl/home.aspx?f=/statystyka/kursy.html) (this will be moved to a separate gem)
+
+You can always write another module that connects to your preferred source and plug it in using `include`.
+
+
 ## Using the tool
 
 Once you have a config file, you can run one of the commands described below to import or process your data:
