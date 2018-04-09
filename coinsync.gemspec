@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/mackuba/coinsync"
   spec.license       = "MIT"
 
-  spec.files         = ['MIT-LICENSE.txt', 'README.md'] + Dir['lib/**/*']
+  spec.files         = ['MIT-LICENSE.txt', 'README.md'] + Dir['lib/**/*'] + Dir['doc/**/*']
 
   spec.bindir        = "bin"
   spec.executables   = Dir['bin/*'].map { |f| File.basename(f) } - ['console', 'setup']
