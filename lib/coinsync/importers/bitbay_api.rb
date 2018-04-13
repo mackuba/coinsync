@@ -45,17 +45,23 @@ module CoinSync
 
         def parse_currency(code)
           case code.upcase
-          when 'BTC' then CryptoCurrency.new('BTC')
-          when 'ETH' then CryptoCurrency.new('ETH')
-          when 'LTC' then CryptoCurrency.new('LTC')
-          when 'LSK' then CryptoCurrency.new('LSK')
+
           when 'BCC' then CryptoCurrency.new('BCH')
+          when 'BTC' then CryptoCurrency.new('BTC')
           when 'BTG' then CryptoCurrency.new('BTG')
-          when 'GAME' then CryptoCurrency.new('GAME')
           when 'DASH' then CryptoCurrency.new('DASH')
-          when 'PLN' then FiatCurrency.new('PLN')
+          when 'ETH' then CryptoCurrency.new('ETH')
+          when 'GAME' then CryptoCurrency.new('GAME')
+          when 'KZC' then CryptoCurrency.new('KZC')
+          when 'LSK' then CryptoCurrency.new('LSK')
+          when 'LTC' then CryptoCurrency.new('LTC')
+          when 'XIN' then CryptoCurrency.new('XIN')
+          when 'XRP' then CryptoCurrency.new('XRP')
+
           when 'EUR' then FiatCurrency.new('EUR')
           when 'USD' then FiatCurrency.new('USD')
+          when 'PLN' then FiatCurrency.new('PLN')
+
           else raise "Unknown currency: #{code}"
           end
         end
