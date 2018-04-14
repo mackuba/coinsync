@@ -15,12 +15,14 @@ module CoinSync
         (coin.is_a?(CryptoCurrency)) or raise "#{self.class}: 'coin' should be a CryptoCurrency"
         (time.is_a?(Time)) or raise "#{self.class}: 'time' should be a Time"
 
-        price = @cache[coin, time]
+        data = @cache[coin, time]
 
-        if price.nil?
-          price = fetch_price(coin, time)
-          @cache[coin, time] = price
+        if data.nil?
+          data = fetch_price(coin, time)
+          @cache[coin, time] = data
         end
+
+        price = data.is_a?(Array) ? data.first : data
 
         [convert_price(price), @currency]
       end

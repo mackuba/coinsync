@@ -18,7 +18,7 @@ module CoinSync
 
       def fetch_price(coin, time)
         result = @cryptowatch.get_price_fast('kraken', coin.code.downcase + currency.code.downcase, time)
-        result.price
+        [result.price, result.time.to_i]
       end
     end
   end
