@@ -17,7 +17,7 @@ module CoinSync
       end
 
       def fetch_price(coin, time)
-        result = @cryptowatch.get_price('kraken', "#{coin.code.downcase}usd", time)
+        result = @cryptowatch.get_price_fast('kraken', coin.code.downcase + currency.code.downcase, time)
         result.price
       end
     end
