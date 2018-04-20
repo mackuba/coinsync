@@ -22,7 +22,7 @@ module CoinSync
       OP_SALE = '-pay_for_currency'
       OP_FEE = '-fee'
 
-      MAX_TIME_DIFFERENCE = 5.0
+      MAX_TIME_DIFFERENCE = 2.0  # TODO: this breaks too easily (3.0)
       TRANSACTION_TYPES = [OP_PURCHASE, OP_SALE, OP_FEE]
 
       class HistoryEntry
