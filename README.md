@@ -145,6 +145,23 @@ The `currency_conversion` option value should be a hash with keys:
 - `to`: code of the currency to convert to (required)
 
 
+### Transaction value estimation
+
+In some cases you might want to know the total value of a transaction in a chosen fiat currency. For purchase and sale transactions, this is just the total amount for which you've bought or sold the given asset. However, for swap (crypto-to-crypto) transactions, the total value can't be simply calculated from the available data, and it might not even be obvious *how* it should be calculated at all.
+
+This is where value estimation modules aka price loaders come in. They're another type of pluggable modules that load historical prices of a given coin from a selected source. For simplicity, only the price of the base coin is checked - e.g. when you buy STEEM with BTC, the value of the transaction (i.e. the value of both the sold BTC and the bought STEEM) is set to the price of BTC at that moment times the amount of BTC spent, and the price of STEEM in USD/EUR isn't checked separately.
+
+Currently only one price loader is available: `cryptowatch`, which can load the price of any coin listed on [Cryptowat.ch](https://cryptowat.ch) (requires the [cointools gem](https://github.com/mackuba/cointools)).
+
+To estimate transaction value using Cryptowat.ch, add a `value_estimation` section in the settings:
+
+- `using`: name of the price loader module (required - `cryptowatch`)
+- `exchange`: name of an exchange listed on Cryptowat.ch (default: `bitfinex`)
+- `currency`: code of the fiat currency in which value should be calculated (default: `USD`)
+
+At the moment this feature is only used in the [Split List](#build-split-list) output.
+
+
 ## Using the tool
 
 Once you have a config file, you can run one of the commands described below to import or process your data:
@@ -198,6 +215,15 @@ coinsync build list
 ```
 
 This will just print all your transactions to a single unified CSV file (in `build/list.csv`).
+
+
+#### Build Split List
+
+```
+coinsync build split-list
+```
+
+Builds a list similar to `build list`, but all "swap" transactions (crypto-to-crypto) are split into separate sale and purchase parts (`build/split-list.csv`). This can be useful for some tax-related calculations, and is only really useful if you also enable the [transaction value estimation option](#transaction-value-estimation).
 
 
 #### Build Raw
