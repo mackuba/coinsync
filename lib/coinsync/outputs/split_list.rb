@@ -17,7 +17,9 @@ module CoinSync
       def initialize(config, target_file)
         super
 
-        @price_loader = @config.value_estimation.price_loader
+        if @config.value_estimation
+          @price_loader = @config.value_estimation.price_loader
+        end
       end
 
       def process_transactions(transactions, *args)
@@ -33,7 +35,7 @@ module CoinSync
           end
         end
 
-        @price_loader.finalize
+        @price_loader&.finalize
 
         if options = @config.currency_conversion
           converter = CurrencyConversionTask.new(options)
@@ -62,7 +64,7 @@ module CoinSync
           sold_amount: tx.sold_amount,
           bought_currency: fiat_currency,
           bought_amount: total_value
-        )        
+        )
 
         purchase = Transaction.new(
           number: "#{tx.number}.B",
@@ -72,7 +74,7 @@ module CoinSync
           bought_amount: tx.bought_amount,
           sold_currency: fiat_currency,
           sold_amount: total_value
-        )        
+        )
 
         [sale, purchase]
       end
@@ -80,7 +82,10 @@ module CoinSync
       def fiat_transaction_to_csv(tx)
         tx_type = @config.translate(tx.type.to_s.capitalize)
 
-        if tx.number.to_s.include?('.')
+        is_split = tx.number.to_s.include?('.')
+        is_incomplete = is_split && tx.bought_amount * tx.sold_amount == 0
+
+        if is_split
           tx_type = @config.translate(Transaction::TYPE_SWAP.to_s.capitalize) + '/' + tx_type
         end
 
@@ -90,14 +95,23 @@ module CoinSync
           tx_type,
           @formatter.format_time(tx.time),
           @formatter.format_crypto(tx.crypto_amount),
-          tx.crypto_currency.code,
-          @formatter.format_fiat(tx.fiat_amount),
-          @formatter.format_fiat_price(tx.price),
-          tx.fiat_currency.code || '–'
+          tx.crypto_currency.code
         ]
 
+        if is_incomplete
+          csv += [nil, nil, nil]
+        else
+          csv += [
+            @formatter.format_fiat(tx.fiat_amount),
+            @formatter.format_fiat_price(tx.price),
+            tx.fiat_currency.code || '–'
+          ]
+        end
+
         if @config.currency_conversion
-          if tx.converted
+          if is_incomplete
+            csv += [nil, nil, nil]
+          elsif tx.converted
             csv += [
               @formatter.format_fiat(tx.converted.fiat_amount),
               @formatter.format_fiat_price(tx.converted.price),
@@ -115,14 +129,23 @@ module CoinSync
         csv
       end
 
-      def get_coin_price(coin, time)
-        print "$"
+      def swap_transaction_to_csv(tx)
+        # sanity check - this should not happen
+        raise "SplitList: unexpected unprocessed swap transaction"
+      end
 
-        begin
-          @price_loader.get_price(coin, time)
-        rescue Exception => e
-          @price_loader.finalize
-          raise
+      def get_coin_price(coin, time)
+        if @price_loader
+          print "$"
+
+          begin
+            @price_loader.get_price(coin, time)
+          rescue Exception => e
+            @price_loader.finalize
+            raise
+          end
+        else
+          [BigDecimal.new(0), FiatCurrency.new(nil)]
         end
       end
     end
