@@ -34,10 +34,10 @@ module CoinSync
           'Currency'
         ].map { |l| @config.translate(l) }
 
-        if currency = @config.convert_to_currency
+        if options = @config.currency_conversion
           line += [
-            @config.translate('Total value ($CURRENCY)').gsub('$CURRENCY', currency.code),
-            @config.translate('Price ($CURRENCY)').gsub('$CURRENCY', currency.code),
+            @config.translate('Total value ($CURRENCY)').gsub('$CURRENCY', options.currency.code),
+            @config.translate('Price ($CURRENCY)').gsub('$CURRENCY', options.currency.code),
             @config.translate('Exchange rate')
           ]
         end
@@ -66,7 +66,7 @@ module CoinSync
           tx.fiat_currency.code || '–'
         ]
 
-        if @config.convert_to_currency
+        if @config.currency_conversion
           if tx.converted
             csv += [
               @formatter.format_fiat(tx.converted.fiat_amount),
@@ -112,7 +112,7 @@ module CoinSync
           currency.code
         ]
 
-        if @config.convert_to_currency
+        if @config.currency_conversion
           csv += [nil, nil, nil]
         end
 

@@ -1,6 +1,8 @@
 require 'ostruct'
 require 'yaml'
 
+require_relative 'currencies'
+require_relative 'currency_converters/all'
 require_relative 'price_loaders/all'
 require_relative 'source'
 
@@ -73,12 +75,8 @@ module CoinSync
       settings['decimal_separator']
     end
 
-    def convert_to_currency
-      settings['convert_to'] ? FiatCurrency.new(settings['convert_to']) : nil
-    end
-
-    def currency_converter
-      settings['convert_with']&.to_sym || :fixer
+    def currency_conversion
+      settings['convert_currency'] && CurrencyConversionOptions.new(settings['convert_currency'])
     end
 
     def value_estimation
@@ -95,6 +93,36 @@ module CoinSync
 
     def translate(label)
       @labels[label] || label
+    end
+
+    class CurrencyConversionOptions < OpenStruct
+      DEFAULT_CURRENCY_CONVERTER = :fixer
+
+      def initialize(options)
+        super
+
+        if options['using']
+          self.currency_converter_name = options['using'].to_sym
+        else
+          self.currency_converter_name = DEFAULT_CURRENCY_CONVERTER
+        end
+
+        if options['to']
+          self.currency = FiatCurrency.new(options['to'].upcase)
+        else
+          raise "'convert_currency' requires a 'to' field with a currency code"
+        end
+      end
+
+      def currency_converter
+        currency_converter_class = CurrencyConverters.registered[currency_converter_name]
+
+        if currency_converter_class
+          currency_converter_class.new(self)
+        else
+          raise "Unknown currency converter: #{currency_converter_name}"
+        end
+      end
     end
 
     class ValueEstimationOptions < OpenStruct

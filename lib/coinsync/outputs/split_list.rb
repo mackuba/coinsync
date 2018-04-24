@@ -35,8 +35,8 @@ module CoinSync
 
         @price_loader.finalize
 
-        if @config.convert_to_currency
-          converter = CurrencyConverter.new(@config)
+        if options = @config.currency_conversion
+          converter = CurrencyConverter.new(options)
           converter.process_transactions(split_list)
         end
 
@@ -96,7 +96,7 @@ module CoinSync
           tx.fiat_currency.code || '–'
         ]
 
-        if @config.convert_to_currency
+        if @config.currency_conversion
           if tx.converted
             csv += [
               @formatter.format_fiat(tx.converted.fiat_amount),

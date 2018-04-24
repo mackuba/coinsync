@@ -18,7 +18,8 @@ module CoinSync
         end
       end
 
-      def initialize
+      def initialize(options)
+        @options = options
         @cache = Cache.new(self.class.name.downcase.split('::').last)
       end
 
