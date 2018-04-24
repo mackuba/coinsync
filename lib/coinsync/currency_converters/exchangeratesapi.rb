@@ -6,10 +6,10 @@ require_relative '../request'
 
 module CoinSync
   module CurrencyConverters
-    class Fixer < Base
-      register_converter :fixer
+    class ExchangeRatesAPI < Base
+      register_converter :exchangeratesapi
 
-      BASE_URL = "https://api.fixer.io"
+      BASE_URL = "https://exchangeratesapi.io/api"
 
       class Exception < StandardError; end
       class NoDataException < Exception; end

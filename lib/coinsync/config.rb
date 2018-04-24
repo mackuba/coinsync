@@ -96,7 +96,7 @@ module CoinSync
     end
 
     class CurrencyConversionOptions < OpenStruct
-      DEFAULT_CURRENCY_CONVERTER = :fixer
+      DEFAULT_CURRENCY_CONVERTER = :exchangeratesapi
 
       def initialize(options)
         super

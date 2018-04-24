@@ -134,14 +134,14 @@ If you want to extend the tool with support for additional importers, build task
 
 If you make transactions in multiple fiat currencies (e.g. USD on Bitfinex, EUR on Kraken) and you want to have all values converted to one currency (for example, to calculate profits for tax purposes), add a `currency_conversion` section in the settings. Currency conversion is done using pluggable modules that load currency rates from specific sources. Currently, two are available:
 
-- `fixer` loads exchange rates from [fixer.io](http://fixer.io) API (note: they've now decided to deprecate this API in June and the new one requires an API key, let me know if you know any better option)
+- `exchangeratesapi` loads exchange rates from [exchangeratesapi.io](https://exchangeratesapi.io) API
 - `nbp` loads rates from [Polish National Bank](http://www.nbp.pl/home.aspx?f=/statystyka/kursy.html) (this might be moved to a separate gem?)
 
 You can always write another module that connects to your preferred source and plug it in using `include`.
 
 The `currency_conversion` option value should be a hash with keys:
 
-- `using`: name of the currency converter module (default: `fixer`)
+- `using`: name of the currency converter module (default: `exchangeratesapi`)
 - `to`: code of the currency to convert to (required)
 
 
