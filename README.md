@@ -88,7 +88,8 @@ settings:
   time_format: "%Y-%m-%d %H:%M"
   column_separator: ";"
   decimal_separator: ","
-  convert_to: PLN
+  convert_currency:
+    to: PLN
 include:
   - extras.rb
 ```
@@ -119,8 +120,7 @@ See the separate ["Importers"](doc/importers.md) doc file for a full list of sup
 
 - `base_cryptocurrencies`: an array listing which cryptocurrencies might be considered the base currency for a trading pair; if both sides of the pair are included in the list, the one earlier in the list takes priority (default: `['USDT', 'BTC', 'ETH', 'BNB', 'KCS', 'LTC', 'BCH', 'NEO']`)
 - `column_separator`: what character is used to separate columns in saved CSV files (default: `","`)
-- `convert_to`: what fiat currency should fiat amounts be converted to (default: none)
-- `convert_with`: what currency converter module should be used to do the currency conversions (default: `fixer`)
+- `convert_currency`: currency conversion config, see below
 - `decimal_separator`: what character is used to separate decimal digits in numbers (default: `"."`)
 - `time_format`: the [time format string](http://ruby-doc.org/core-2.5.0/Time.html#method-i-strftime) to use when printing dates (default: `"%Y-%m-%d %H:%M:%S"`)
 - `timezone`: an explicit timezone to use for printing dates and currency conversion (default: system timezone)
@@ -132,12 +132,17 @@ If you want to extend the tool with support for additional importers, build task
 
 ### Currency conversion
 
-If you make transactions in multiple fiat currencies (e.g. USD on Bitfinex, EUR on Kraken) and you want to have all values converted to one currency (for example, to calculate profits for tax purposes), use the `convert_to` and `convert_with` options in the settings. Currency conversion is done using pluggable modules that load currency rates from specific sources. Currently, two are available:
+If you make transactions in multiple fiat currencies (e.g. USD on Bitfinex, EUR on Kraken) and you want to have all values converted to one currency (for example, to calculate profits for tax purposes), add a `currency_conversion` section in the settings. Currency conversion is done using pluggable modules that load currency rates from specific sources. Currently, two are available:
 
 - `fixer` loads exchange rates from [fixer.io](http://fixer.io) API (note: they've now decided to deprecate this API in June and the new one requires an API key, let me know if you know any better option)
-- `nbp` loads rates from [Polish National Bank](http://www.nbp.pl/home.aspx?f=/statystyka/kursy.html) (this will be moved to a separate gem)
+- `nbp` loads rates from [Polish National Bank](http://www.nbp.pl/home.aspx?f=/statystyka/kursy.html) (this might be moved to a separate gem?)
 
 You can always write another module that connects to your preferred source and plug it in using `include`.
+
+The `currency_conversion` option value should be a hash with keys:
+
+- `using`: name of the currency converter module (default: `fixer`)
+- `to`: code of the currency to convert to (required)
 
 
 ## Using the tool
