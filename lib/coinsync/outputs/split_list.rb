@@ -3,7 +3,6 @@ require 'csv'
 require_relative 'base'
 require_relative '../currencies'
 require_relative '../currency_converter'
-require_relative '../price_loaders/all'
 require_relative '../transaction'
 
 module CoinSync
@@ -18,7 +17,7 @@ module CoinSync
       def initialize(config, target_file)
         super
 
-        @kraken = PriceLoaders::Kraken.new
+        @price_loader = @config.value_estimation.price_loader
       end
 
       def process_transactions(transactions, *args)
@@ -34,7 +33,7 @@ module CoinSync
           end
         end
 
-        @kraken.finalize
+        @price_loader.finalize
 
         if @config.convert_to_currency
           converter = CurrencyConverter.new(@config)
@@ -120,9 +119,9 @@ module CoinSync
         print "$"
 
         begin
-          @kraken.get_price(coin, time)
+          @price_loader.get_price(coin, time)
         rescue Exception => e
-          @kraken.finalize
+          @price_loader.finalize
           raise
         end
       end

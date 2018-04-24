@@ -1,5 +1,7 @@
+require 'ostruct'
 require 'yaml'
 
+require_relative 'price_loaders/all'
 require_relative 'source'
 
 module CoinSync
@@ -79,6 +81,10 @@ module CoinSync
       settings['convert_with']&.to_sym || :fixer
     end
 
+    def value_estimation
+      settings['estimate_value'] && ValueEstimationOptions.new(settings['estimate_value'])
+    end
+
     def time_format
       settings['time_format']
     end
@@ -89,6 +95,28 @@ module CoinSync
 
     def translate(label)
       @labels[label] || label
+    end
+
+    class ValueEstimationOptions < OpenStruct
+      def initialize(options)
+        super
+
+        if options['using']
+          self.price_loader_name = options['using'].to_sym
+        else
+          raise "'value_estimation' requires a 'using' field with a name of a price loader"
+        end
+      end
+
+      def price_loader
+        price_loader_class = PriceLoaders.registered[price_loader_name]
+
+        if price_loader_class
+          price_loader_class.new(self)
+        else
+          raise "Unknown price loader: #{price_loader_name}"
+        end
+      end
     end
   end
 end 

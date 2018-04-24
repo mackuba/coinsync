@@ -5,10 +5,27 @@ require_relative '../currencies'
 
 module CoinSync
   module PriceLoaders
+    def self.registered
+      @price_loaders ||= {}
+    end
+
     class Base
-      def initialize
-        @cache = Cache.new(self.class.name.downcase.split('::').last)
+      def self.register_price_loader(key)
+        if PriceLoaders.registered[key.to_sym]
+          raise "Price loader has already been registered at '#{key}'"
+        else
+          PriceLoaders.registered[key.to_sym] = self
+        end
+      end
+
+      def initialize(options)
+        @options = options
         @currency = currency
+        @cache = Cache.new(cache_name)
+      end
+
+      def cache_name
+        self.class.name.downcase.split('::').last
       end
 
       def get_price(coin, time)

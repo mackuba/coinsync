@@ -6,7 +6,7 @@ module CoinSync
     class Cache
       def initialize(name)
         @name = name
-        @filename = "data/prices-#{name}.json"
+        @filename = "data/prices/#{name}.json"
 
         if File.exist?(@filename)
           @prices = JSON.parse(File.read(@filename))
