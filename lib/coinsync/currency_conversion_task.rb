@@ -4,7 +4,7 @@ require 'time'
 require_relative 'transaction'
 
 module CoinSync
-  class CurrencyConverter
+  class CurrencyConversionTask
     def initialize(options)
       @options = options
       @target_currency = options.currency

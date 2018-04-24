@@ -1,7 +1,7 @@
 require 'fileutils'
 
 require_relative 'builder'
-require_relative 'currency_converter'
+require_relative 'currency_conversion_task'
 require_relative 'outputs/all'
 
 module CoinSync
@@ -32,7 +32,7 @@ module CoinSync
 
       if output.requires_currency_conversion?
         if options = @config.currency_conversion
-          converter = CurrencyConverter.new(options)
+          converter = CurrencyConversionTask.new(options)
           converter.process_transactions(transactions)
         end
       end

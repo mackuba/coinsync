@@ -2,7 +2,7 @@ require 'csv'
 
 require_relative 'base'
 require_relative '../currencies'
-require_relative '../currency_converter'
+require_relative '../currency_conversion_task'
 require_relative '../transaction'
 
 module CoinSync
@@ -36,7 +36,7 @@ module CoinSync
         @price_loader.finalize
 
         if options = @config.currency_conversion
-          converter = CurrencyConverter.new(options)
+          converter = CurrencyConversionTask.new(options)
           converter.process_transactions(split_list)
         end
 
