@@ -43,7 +43,8 @@ module CoinSync
       end
 
       def import_transactions(filename)
-        response = make_request('/order/dealt', limit: 100) # TODO: what if there's more than 100?
+        # TODO: what if there's more than 100? (looks like we might need to switch to loading each market separately…)
+        response = make_request('/order/dealt', limit: 100)
 
         case response
         when Net::HTTPSuccess

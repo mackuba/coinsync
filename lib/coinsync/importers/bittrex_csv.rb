@@ -58,7 +58,7 @@ module CoinSync
             transactions << Transaction.new(
               exchange: 'Bittrex',
               time: entry.time_closed,
-              bought_amount: entry.price - entry.commission,   # TODO check this
+              bought_amount: entry.price - entry.commission,
               bought_currency: entry.currency,
               sold_amount: entry.quantity,
               sold_currency: entry.asset

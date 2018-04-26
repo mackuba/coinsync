@@ -94,7 +94,8 @@ module CoinSync
         currencies.each do |currency|
           sleep 1  # rate limiting
 
-          response = make_request('history', currency: currency, limit: 10000)  # TODO: does this limit really work?
+          # TODO: does this limit really work? (no way to test it really and docs don't mention a max value)
+          response = make_request('history', currency: currency, limit: 10000)
 
           case response
           when Net::HTTPSuccess
