@@ -68,7 +68,10 @@ module CoinSync
         entry.lp = line[0].to_i
         entry.exchange = line[1]
         entry.type = line[2]
-        entry.date = Time.parse(line[3])
+
+        time = Time.parse(line[3])
+        entry.date = @config.timezone ? @config.timezone.local_to_utc(time) : time
+
         entry.amount = @formatter.parse_decimal(line[4])
         entry.asset = CryptoCurrency.new(line[5])
         entry.total = @formatter.parse_decimal(line[6])
