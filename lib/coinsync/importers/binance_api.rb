@@ -68,23 +68,30 @@ module CoinSync
         transactions = []
 
         @traded_pairs.uniq.each do |pair|
-          response = make_request('/v3/myTrades', limit: 500, symbol: pair) # TODO: paging
+          lastId = 0
 
-          case response
-          when Net::HTTPSuccess
-            json = JSON.parse(response.body)
+          loop do
+            response = make_request('/v3/myTrades', limit: 500, fromId: lastId + 1, symbol: pair)
 
-            if json.is_a?(Hash)
-              raise "Binance importer: Invalid response: #{response.body}"
+            case response
+            when Net::HTTPSuccess
+              json = JSON.parse(response.body)
+
+              if !json.is_a?(Array)
+                raise "Binance importer: Invalid response: #{response.body}"
+              elsif json.empty?
+                break
+              else
+                json.each { |tx| tx['symbol'] = pair }
+                lastId = json.map { |j| j['id'] }.sort.last
+
+                transactions.concat(json)
+              end
+            when Net::HTTPBadRequest
+              raise "Binance importer: Bad request: #{response} (#{response.body})"
+            else
+              raise "Binance importer: Bad response: #{response}"
             end
-
-            json.each { |tx| tx['symbol'] = pair }
-
-            transactions.concat(json)
-          when Net::HTTPBadRequest
-            raise "Binance importer: Bad request: #{response} (#{response.body})"
-          else
-            raise "Binance importer: Bad response: #{response}"
           end
         end
 
@@ -187,6 +194,8 @@ module CoinSync
       private
 
       def make_request(path, params = {}, signed = true)
+        print '.'
+
         if signed
           (@api_key && @secret_key) or raise "Public and secret API keys must be provided"
 
