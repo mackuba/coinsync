@@ -3,6 +3,7 @@ require 'json'
 require 'net/http'
 require 'openssl'
 require 'time'
+require 'tzinfo'
 require 'uri'
 
 require_relative 'base'
@@ -25,11 +26,13 @@ module CoinSync
       MAX_TIME_DIFFERENCE = 2.0  # TODO: this breaks too easily (3.0)
       TRANSACTION_TYPES = [OP_PURCHASE, OP_SALE, OP_FEE]
 
+      POLISH_TIMEZONE = TZInfo::Timezone.get('Europe/Warsaw')
+
       class HistoryEntry
         attr_accessor :date, :amount, :type, :currency
 
         def initialize(hash)
-          @date = Time.parse(hash['time'])  # TODO: these times are all fucked up
+          @date = POLISH_TIMEZONE.local_to_utc(Time.parse(hash['time']))
           @amount = BigDecimal.new(hash['amount'])
           @type = hash['operation_type']
           @currency = parse_currency(hash['currency'])
