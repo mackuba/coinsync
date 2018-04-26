@@ -1,3 +1,10 @@
+#### Version 0.2.1 (26.04.2018)
+
+* fixed parsing of sale transactions in Kucoin importer
+* fixed pagination in Binance importer
+* fixed transaction matching in BitBay API importer
+* fixed timezone handling in multiple importers and currency converters (using tzinfo gem)
+
 #### Version 0.2.0 (24.04.2018)
 
 * added `split-list` output
