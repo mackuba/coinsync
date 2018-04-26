@@ -16,7 +16,7 @@ module CoinSync
           csv << headers
 
           transactions.each do |tx|
-            csv << transaction_to_csv(tx)
+            process_transaction(tx, csv)
           end
         end
       end
@@ -43,6 +43,10 @@ module CoinSync
         end
 
         line
+      end
+
+      def process_transaction(tx, csv)
+        csv << transaction_to_csv(tx)
       end
 
       def transaction_to_csv(tx)
