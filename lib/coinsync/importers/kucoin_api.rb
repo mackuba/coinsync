@@ -128,8 +128,16 @@ module CoinSync
               sold_amount: entry.deal_value,
               sold_currency: entry.coin_type_pair
             )
+          elsif entry.direction == 'SELL'
+            transactions << Transaction.new(
+              exchange: 'Kucoin',
+              time: entry.created_at,
+              sold_amount: entry.amount,
+              sold_currency: entry.coin_type,
+              bought_amount: entry.deal_value - entry.fee,
+              bought_currency: entry.coin_type_pair
+            )
           else
-            # TODO sell
             raise "Kucoin importer error: unexpected entry direction '#{entry.direction}'"
           end
         end
