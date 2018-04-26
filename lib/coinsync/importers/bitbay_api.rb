@@ -23,7 +23,7 @@ module CoinSync
       OP_SALE = '-pay_for_currency'
       OP_FEE = '-fee'
 
-      MAX_TIME_DIFFERENCE = 2.0  # TODO: this breaks too easily (3.0)
+      MAX_TIME_DIFFERENCE = 5.0
       TRANSACTION_TYPES = [OP_PURCHASE, OP_SALE, OP_FEE]
 
       POLISH_TIMEZONE = TZInfo::Timezone.get('Europe/Warsaw')
@@ -148,15 +148,17 @@ module CoinSync
 
           next unless TRANSACTION_TYPES.include?(entry.type)
 
-          if !matching.empty? && matching.any? { |e| (e.date - entry.date).abs > MAX_TIME_DIFFERENCE }
-            transactions << process_matched(matching)
+          if !matching.empty?
+            must_match = matching.any? { |e| (e.date - entry.date).abs > MAX_TIME_DIFFERENCE }
+            transaction = process_matched(matching, must_match)
+            transactions << transaction if transaction
           end
 
           matching << entry
         end
 
         if !matching.empty?
-          transactions << process_matched(matching)
+          transactions << process_matched(matching, true)
         end
 
         transactions
@@ -165,7 +167,7 @@ module CoinSync
 
       private
 
-      def process_matched(matching)
+      def process_matched(matching, must_match)
         if matching.length % 3 == 0
           purchases = matching.select { |tx| tx.type == OP_PURCHASE }
           sales = matching.select { |tx| tx.type == OP_SALE }
@@ -190,7 +192,10 @@ module CoinSync
           end
         end
 
-        raise "BitBay API importer error: Couldn't match some history lines: #{matching}"
+        if must_match
+          raise "BitBay API importer error: Couldn't match some history lines: " +
+            matching.map { |m| "\n#{m.inspect}" }.join
+        end
       end
 
       def make_request(method, params = {})
