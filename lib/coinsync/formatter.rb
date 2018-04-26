@@ -33,7 +33,8 @@ module CoinSync
     end
 
     def format_time(time)
-      time.strftime(@config.time_format || '%Y-%m-%d %H:%M:%S')
+      local_time = @config.timezone ? @config.timezone.utc_to_local(time.utc) : time
+      local_time.strftime(@config.time_format || '%Y-%m-%d %H:%M:%S')
     end
 
     def parse_decimal(string)

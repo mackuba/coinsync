@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'tzinfo'
 require 'yaml'
 
 require_relative 'currencies'
@@ -28,8 +29,6 @@ module CoinSync
           require(File.expand_path(File.join(*directory, file)))
         end
       end
-
-      set_timezone(timezone) if timezone
     end
 
     def sources
@@ -53,10 +52,6 @@ module CoinSync
       end
 
       Hash[included.map { |source| [source.key, source] }]
-    end
-
-    def set_timezone(timezone)
-      ENV['TZ'] = timezone
     end
 
     def base_cryptocurrencies
@@ -88,7 +83,7 @@ module CoinSync
     end
 
     def timezone
-      settings['timezone']
+      settings['timezone'] && TZInfo::Timezone.get(settings['timezone'])
     end
 
     def translate(label)

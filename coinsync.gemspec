@@ -17,4 +17,6 @@ Gem::Specification.new do |spec|
 
   spec.bindir        = "bin"
   spec.executables   = Dir['bin/*'].map { |f| File.basename(f) } - ['console', 'setup']
+
+  spec.add_dependency 'tzinfo', '>= 1.2.5', '< 2.0'
 end
