@@ -1,6 +1,7 @@
 require 'bigdecimal'
 require 'csv'
 require 'time'
+require 'tzinfo'
 
 require_relative 'base'
 require_relative '../currencies'
@@ -24,10 +25,12 @@ module CoinSync
       class HistoryEntry
         attr_accessor :date, :accounting_date, :type, :amount, :currency
 
+        POLISH_TIMEZONE = TZInfo::Timezone.get('Europe/Warsaw')
+
         def initialize(line)
-          # TODO: force parsing in Polish timezone
-          @date = Time.parse(line[0]) unless line[0] == '-'
-          @accounting_date = Time.parse(line[1]) unless line[1] == '-'
+          @date = POLISH_TIMEZONE.local_to_utc(Time.parse(line[0])) unless line[0] == '-'
+          @accounting_date = POLISH_TIMEZONE.local_to_utc(Time.parse(line[1])) unless line[1] == '-'
+
           @type = line[2]
 
           amount, currency = line[3].split(' ')
