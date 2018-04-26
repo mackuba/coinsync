@@ -1,6 +1,5 @@
 require 'base64'
 require 'bigdecimal'
-require 'json'
 require 'net/http'
 require 'openssl'
 require 'uri'
@@ -44,11 +43,28 @@ module CoinSync
 
       def import_transactions(filename)
         # TODO: what if there's more than 100? (looks like we might need to switch to loading each market separately…)
-        response = make_request('/order/dealt', limit: 100)
+        json = make_request('/order/dealt', limit: 100)
 
-        case response
-        when Net::HTTPSuccess
-          json = JSON.parse(response.body)
+        if json['success'] != true || json['code'] != 'OK'
+          raise "Kucoin importer: Invalid response: #{response.body}"
+        end
+
+        data = json['data']
+        list = data && data['datas']
+
+        if !list
+          raise "Kucoin importer: No data returned: #{response.body}"
+        end
+
+        File.write(filename, JSON.pretty_generate(list) + "\n")
+      end
+
+      def import_balances
+        page = 1
+        full_list = []
+
+        loop do
+          json = make_request('/account/balances', limit: 20, page: page)
 
           if json['success'] != true || json['code'] != 'OK'
             raise "Kucoin importer: Invalid response: #{response.body}"
@@ -61,45 +77,10 @@ module CoinSync
             raise "Kucoin importer: No data returned: #{response.body}"
           end
 
-          File.write(filename, JSON.pretty_generate(list) + "\n")
-        when Net::HTTPBadRequest
-          raise "Kucoin importer: Bad request: #{response}"
-        else
-          raise "Kucoin importer: Bad response: #{response}"
-        end
-      end
+          full_list.concat(list)
 
-      def import_balances
-        page = 1
-        full_list = []
-
-        loop do
-          response = make_request('/account/balances', limit: 20, page: page)
-
-          case response
-          when Net::HTTPSuccess
-            json = JSON.parse(response.body)
-
-            if json['success'] != true || json['code'] != 'OK'
-              raise "Kucoin importer: Invalid response: #{response.body}"
-            end
-
-            data = json['data']
-            list = data && data['datas']
-
-            if !list
-              raise "Kucoin importer: No data returned: #{response.body}"
-            end
-
-            full_list.concat(list)
-
-            page += 1
-            break if page > data['pageNos']
-          when Net::HTTPBadRequest
-            raise "Kucoin importer: Bad request: #{response}"
-          else
-            raise "Kucoin importer: Bad response: #{response}"
-          end
+          page += 1
+          break if page > data['pageNos']
         end
 
         full_list.delete_if { |b| b['balance'] == 0.0 && b['freezeBalance'] == 0.0 }
@@ -160,7 +141,7 @@ module CoinSync
         string_to_hash = Base64.strict_encode64("#{endpoint}/#{nonce}/#{url.query}")
         hmac = OpenSSL::HMAC.hexdigest('sha256', @api_secret, string_to_hash)
 
-        Request.get(url) do |request|
+        Request.get_json(url) do |request|
           request['KC-API-KEY'] = @api_key
           request['KC-API-NONCE'] = nonce
           request['KC-API-SIGNATURE'] = hmac

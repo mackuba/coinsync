@@ -1,5 +1,4 @@
 require 'bigdecimal'
-require 'json'
 require 'net/http'
 require 'time'
 require 'uri'
@@ -43,49 +42,31 @@ module CoinSync
         transactions = []
 
         loop do
-          response = make_request('/getTransactionsByAddress', address: @address, limit: limit, offset: offset)
+          json = make_request('/getTransactionsByAddress', address: @address, limit: limit, offset: offset)
 
-          case response
-          when Net::HTTPSuccess
-            json = JSON.parse(response.body)
-
-            if json['success'] != true || !json['transactions']
-              raise "Ark importer: Invalid response: #{response.body}"
-            end
-
-            break if json['transactions'].empty?
-
-            rewards = json['transactions'].select { |tx| tx['senderDelegate'] }
-            transactions.concat(rewards)
-
-            offset += limit
-          when Net::HTTPBadRequest
-            raise "Ark importer: Bad request: #{response}"
-          else
-            raise "Ark importer: Bad response: #{response}"
+          if json['success'] != true || !json['transactions']
+            raise "Ark importer: Invalid response: #{response.body}"
           end
+
+          break if json['transactions'].empty?
+
+          rewards = json['transactions'].select { |tx| tx['senderDelegate'] }
+          transactions.concat(rewards)
+
+          offset += limit
         end
 
         File.write(filename, JSON.pretty_generate(transactions) + "\n")
       end
 
       def import_balances
-        response = make_request('/getAccount', address: @address)
+        json = make_request('/getAccount', address: @address)
 
-        case response
-        when Net::HTTPSuccess
-          json = JSON.parse(response.body)
-
-          if json['success'] != true || !json['balance']
-            raise "Ark importer: Invalid response: #{response.body}"
-          end
-
-          [Balance.new(ARK, available: BigDecimal.new(json['balance']) / 100_000_000)]
-        when Net::HTTPBadRequest
-          raise "Ark importer: Bad request: #{response}"
-        else
-          raise "Ark importer: Bad response: #{response}"
+        if json['success'] != true || !json['balance']
+          raise "Ark importer: Invalid response: #{response.body}"
         end
+
+        [Balance.new(ARK, available: BigDecimal.new(json['balance']) / 100_000_000)]
       end
 
       def read_transaction_list(source)
@@ -114,7 +95,7 @@ module CoinSync
         url = URI(BASE_URL + path)
         url.query = URI.encode_www_form(params)
 
-        Request.get(url)
+        Request.get_json(url)
       end
     end
   end

@@ -1,6 +1,5 @@
 require 'base64'
 require 'bigdecimal'
-require 'json'
 require 'net/http'
 require 'openssl'
 require 'uri'
@@ -38,69 +37,51 @@ module CoinSync
         slowdown = false
 
         loop do
-          response = make_request('/0/private/Ledgers', ofs: offset)
+          json = make_request('/0/private/Ledgers', ofs: offset)
           print slowdown ? '-' : '.'
           sleep(2 * API_RENEWAL_INTERVAL) if slowdown   # rate limiting
 
-          case response
-          when Net::HTTPSuccess
-            json = JSON.parse(response.body)
-
-            if json['result'].nil? || json['error'].length > 0
-              if json['error'].first == 'EAPI:Rate limit exceeded'
-                slowdown = true
-                print '!'
-                sleep(4 * API_RENEWAL_INTERVAL)
-                next
-              else
-                raise "Kraken importer: Invalid response: #{response.body}"
-              end
+          if json['result'].nil? || json['error'].length > 0
+            if json['error'].first == 'EAPI:Rate limit exceeded'
+              slowdown = true
+              print '!'
+              sleep(4 * API_RENEWAL_INTERVAL)
+              next
+            else
+              raise "Kraken importer: Invalid response: #{response.body}"
             end
-
-            data = json['result']
-            list = data && data['ledger']
-
-            if !list
-              raise "Kraken importer: No data returned: #{response.body}"
-            end
-
-            break if list.empty?
-
-            entries.concat(list.values)
-            offset += list.length
-          when Net::HTTPBadRequest
-            raise "Kraken importer: Bad request: #{response.body}"
-          else
-            raise "Kraken importer: Bad response: #{response.body}"
           end
+
+          data = json['result']
+          list = data && data['ledger']
+
+          if !list
+            raise "Kraken importer: No data returned: #{response.body}"
+          end
+
+          break if list.empty?
+
+          entries.concat(list.values)
+          offset += list.length
         end
 
         File.write(filename, JSON.pretty_generate(entries) + "\n")
       end
 
       def import_balances
-        response = make_request('/0/private/Balance')
+        json = make_request('/0/private/Balance')
 
-        case response
-        when Net::HTTPSuccess
-          json = JSON.parse(response.body)
-
-          if !json['error'].empty? || !json['result']
-            raise "Kraken importer: Invalid response: #{response.body}"
-          end
-
-          return json['result'].map { |k, v|
-            [Kraken::LedgerEntry.parse_currency(k), BigDecimal.new(v)]
-          }.select { |currency, amount|
-            amount > 0 && currency.crypto?
-          }.map { |currency, amount|
-            Balance.new(currency, available: amount)
-          }
-        when Net::HTTPBadRequest
-          raise "Kraken importer: Bad request: #{response.body}"
-        else
-          raise "Kraken importer: Bad response: #{response.body}"
+        if !json['error'].empty? || !json['result']
+          raise "Kraken importer: Invalid response: #{response.body}"
         end
+
+        return json['result'].map { |k, v|
+          [Kraken::LedgerEntry.parse_currency(k), BigDecimal.new(v)]
+        }.select { |currency, amount|
+          amount > 0 && currency.crypto?
+        }.map { |currency, amount|
+          Balance.new(currency, available: amount)
+        }
       end
 
       def read_transaction_list(source)
@@ -123,7 +104,7 @@ module CoinSync
         string_to_hash = path + OpenSSL::Digest.new('sha256', nonce.to_s + post_data).digest
         hmac = Base64.strict_encode64(OpenSSL::HMAC.digest('sha512', @decoded_secret, string_to_hash))
 
-        Request.post(url) do |request|
+        Request.post_json(url) do |request|
           request.body = post_data
           request['API-Key'] = @api_key
           request['API-Sign'] = hmac

@@ -15,7 +15,6 @@ module CoinSync
 
       class Exception < StandardError; end
       class NoDataException < Exception; end
-      class BadRequestException < Exception; end
 
       def get_conversion_rate(from:, to:, time:)
         (from.is_a?(FiatCurrency)) or raise "#{self.class}: 'from' should be a FiatCurrency"
@@ -30,22 +29,14 @@ module CoinSync
           return rate
         end
 
-        response = Request.get("#{BASE_URL}/exchangerates/rates/a/#{from.code}/#{date - 8}/#{date - 1}/?format=json")
+        json = Request.get_json("#{BASE_URL}/exchangerates/rates/a/#{from.code}/#{date - 8}/#{date - 1}/?format=json")
 
-        case response
-        when Net::HTTPSuccess
-          json = JSON.parse(response.body)
-          rate = json['rates'] && json['rates'].last && json['rates'].last['mid']
-          raise NoDataException.new("No exchange rate found for #{from.code.upcase}") if rate.nil?
+        rate = json['rates'] && json['rates'].last && json['rates'].last['mid']
+        raise NoDataException.new("No exchange rate found for #{from.code.upcase}") if rate.nil?
 
-          @cache[from, to, date] = rate
+        @cache[from, to, date] = rate
 
-          return rate
-        when Net::HTTPBadRequest
-          raise BadRequestException.new(response)
-        else
-          raise Exception.new(response)
-        end
+        return rate
       end
     end
   end

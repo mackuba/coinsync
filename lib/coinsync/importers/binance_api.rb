@@ -1,5 +1,4 @@
 require 'bigdecimal'
-require 'json'
 require 'net/http'
 require 'openssl'
 require 'uri'
@@ -71,26 +70,17 @@ module CoinSync
           lastId = 0
 
           loop do
-            response = make_request('/v3/myTrades', limit: 500, fromId: lastId + 1, symbol: pair)
+            json = make_request('/v3/myTrades', limit: 500, fromId: lastId + 1, symbol: pair)
 
-            case response
-            when Net::HTTPSuccess
-              json = JSON.parse(response.body)
-
-              if !json.is_a?(Array)
-                raise "Binance importer: Invalid response: #{response.body}"
-              elsif json.empty?
-                break
-              else
-                json.each { |tx| tx['symbol'] = pair }
-                lastId = json.map { |j| j['id'] }.sort.last
-
-                transactions.concat(json)
-              end
-            when Net::HTTPBadRequest
-              raise "Binance importer: Bad request: #{response} (#{response.body})"
+            if !json.is_a?(Array)
+              raise "Binance importer: Invalid response: #{response.body}"
+            elsif json.empty?
+              break
             else
-              raise "Binance importer: Bad response: #{response}"
+              json.each { |tx| tx['symbol'] = pair }
+              lastId = json.map { |j| j['id'] }.sort.last
+
+              transactions.concat(json)
             end
           end
         end
@@ -99,59 +89,36 @@ module CoinSync
       end
 
       def import_balances
-        response = make_request('/v3/account')
+        json = make_request('/v3/account')
 
-        case response
-        when Net::HTTPSuccess
-          json = JSON.parse(response.body)
-
-          if json['code'] || !json['balances']
-            raise "Binance importer: Invalid response: #{response.body}"
-          end
-
-          return json['balances'].select { |b|
-            b['free'].to_f > 0 || b['locked'].to_f > 0
-          }.map { |b|
-            Balance.new(
-              CryptoCurrency.new(b['asset']),
-              available: BigDecimal.new(b['free']),
-              locked: BigDecimal.new(b['locked'])
-            )
-          }
-        when Net::HTTPBadRequest
-          raise "Binance importer: Bad request: #{response}"
-        else
-          raise "Binance importer: Bad response: #{response}"
+        if json['code'] || !json['balances']
+          raise "Binance importer: Invalid response: #{response.body}"
         end
+
+        return json['balances'].select { |b|
+          b['free'].to_f > 0 || b['locked'].to_f > 0
+        }.map { |b|
+          Balance.new(
+            CryptoCurrency.new(b['asset']),
+            available: BigDecimal.new(b['free']),
+            locked: BigDecimal.new(b['locked'])
+          )
+        }
       end
 
       def find_all_pairs
-        info_response = make_request('/v1/exchangeInfo', {}, false)
-
-        if !info_response.is_a?(Net::HTTPSuccess)
-          raise "Binance importer: Bad response: #{info_response.body}"
-        end
-
-        info_json = JSON.parse(info_response.body)
-
+        info = make_request('/v1/exchangeInfo', {}, false)
         found = []
 
-        info_json['symbols'].each do |data|
+        info['symbols'].each do |data|
           symbol = data['symbol']
-          trades_response = make_request('/v3/myTrades', limit: 1, symbol: symbol)
+          trades = make_request('/v3/myTrades', limit: 1, symbol: symbol)
 
-          case trades_response
-          when Net::HTTPSuccess
-            trades_json = JSON.parse(trades_response.body)
-
-            if trades_json.length > 0
-              print '*'
-              found << symbol
-            else
-              print '.'
-            end
+          if trades.length > 0
+            print '*'
+            found << symbol
           else
-            raise "Binance importer: Bad response: #{trades_response.body}"
+            print '.'
           end
         end
 
@@ -210,7 +177,7 @@ module CoinSync
           url.query += "&signature=#{hmac}"
         end
 
-        Request.get(url) do |request|
+        Request.get_json(url) do |request|
           request['X-MBX-APIKEY'] = @api_key
         end
       end

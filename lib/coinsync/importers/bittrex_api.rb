@@ -1,5 +1,4 @@
 require 'bigdecimal'
-require 'json'
 require 'net/http'
 require 'openssl'
 require 'uri'
@@ -33,30 +32,21 @@ module CoinSync
       end
 
       def import_balances
-        response = make_request('/account/getbalances')
+        json = make_request('/account/getbalances')
 
-        case response
-        when Net::HTTPSuccess
-          json = JSON.parse(response.body)
-
-          if json['success'] != true || !json['result']
-            raise "Bittrex importer: Invalid response: #{response.body}"
-          end
-
-          return json['result'].select { |b|
-            b['Balance'] > 0
-          }.map { |b|
-            Balance.new(
-              CryptoCurrency.new(b['Currency']),
-              available: BigDecimal.new(b['Available'], 0),
-              locked: BigDecimal.new(b['Balance'], 0) - BigDecimal.new(b['Available'], 0)
-            )
-          }
-        when Net::HTTPBadRequest
-          raise "Bittrex importer: Bad request: #{response}"
-        else
-          raise "Bittrex importer: Bad response: #{response}"
+        if json['success'] != true || !json['result']
+          raise "Bittrex importer: Invalid response: #{response.body}"
         end
+
+        return json['result'].select { |b|
+          b['Balance'] > 0
+        }.map { |b|
+          Balance.new(
+            CryptoCurrency.new(b['Currency']),
+            available: BigDecimal.new(b['Available'], 0),
+            locked: BigDecimal.new(b['Balance'], 0) - BigDecimal.new(b['Available'], 0)
+          )
+        }
       end
 
       private
@@ -72,7 +62,7 @@ module CoinSync
 
         hmac = OpenSSL::HMAC.hexdigest('sha512', @api_secret, url.to_s)
 
-        Request.get(url) do |request|
+        Request.get_json(url) do |request|
           request['apisign'] = hmac
         end
       end

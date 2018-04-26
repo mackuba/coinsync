@@ -1,3 +1,4 @@
+require 'json'
 require 'net/http'
 require 'uri'
 
@@ -5,12 +6,18 @@ require_relative 'version'
 
 module CoinSync
   module Request
-    def self.get(url, &block)
-      self.request(url, Net::HTTP::Get, &block)
-    end
+    [:get, :post].each do |method|
+      define_singleton_method(method) do |url, &block|
+        self.request(url, Net::HTTP.const_get(method.to_s.capitalize), &block)
+      end
 
-    def self.post(url, &block)
-      self.request(url, Net::HTTP::Post, &block)
+      define_singleton_method("#{method}_text") do |url, &block|
+        self.request_text(url, Net::HTTP.const_get(method.to_s.capitalize), &block)
+      end
+
+      define_singleton_method("#{method}_json") do |url, &block|
+        self.request_json(url, Net::HTTP.const_get(method.to_s.capitalize), &block)
+      end
     end
 
     private
@@ -25,6 +32,29 @@ module CoinSync
         yield request if block_given?
 
         http.request(request)
+      end
+    end
+
+    def self.request_text(url, request_type, &block)
+      response = request(url, request_type, &block)
+
+      case response
+      when Net::HTTPSuccess
+        response.body
+      when Net::HTTPBadRequest
+        raise "Bad request: #{response}"
+      else
+        raise "Bad response: #{response}"
+      end
+    end
+
+    def self.request_json(url, request_type, &block)
+      response = request_text(url, request_type, &block)
+
+      if response.empty?
+        raise "Received empty response"
+      else
+        JSON.parse(response)
       end
     end
   end

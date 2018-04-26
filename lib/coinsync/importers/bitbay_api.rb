@@ -1,5 +1,4 @@
 require 'bigdecimal'
-require 'json'
 require 'net/http'
 require 'openssl'
 require 'time'
@@ -98,22 +97,13 @@ module CoinSync
           sleep 1  # rate limiting
 
           # TODO: does this limit really work? (no way to test it really and docs don't mention a max value)
-          response = make_request('history', currency: currency, limit: 10000)
+          json = make_request('history', currency: currency, limit: 10000)
 
-          case response
-          when Net::HTTPSuccess
-            json = JSON.parse(response.body)
-
-            if !json.is_a?(Array)
-              raise "BitBay API importer: Invalid response: #{response.body}"
-            end
-
-            transactions.concat(json)
-          when Net::HTTPBadRequest
-            raise "BitBay API importer: Bad request: #{response}"
-          else
-            raise "BitBay API importer: Bad response: #{response}"
+          if !json.is_a?(Array)
+            raise "BitBay API importer: Invalid response: #{response.body}"
           end
+
+          transactions.concat(json)
         end
 
         transactions.each_with_index { |tx, i| tx['i'] = i }
@@ -209,7 +199,7 @@ module CoinSync
         param_string = URI.encode_www_form(params)
         hmac = OpenSSL::HMAC.hexdigest('sha512', @secret_key, param_string)
 
-        Request.post(url) do |request|
+        Request.post_json(url) do |request|
           request.body = param_string
           request['API-Key'] = @public_key
           request['API-Hash'] = hmac
@@ -217,22 +207,13 @@ module CoinSync
       end
 
       def fetch_info
-        response = make_request('info')
+        json = make_request('info')
 
-        case response
-        when Net::HTTPSuccess
-          json = JSON.parse(response.body)
-
-          if json['success'] != 1 || json['code'] || json['balances'].nil?
-            raise "BitBay API importer: Invalid response: #{response.body}"
-          end
-
-          json
-        when Net::HTTPBadRequest
-          raise "BitBay API importer: Bad request: #{response}"
-        else
-          raise "BitBay API importer: Bad response: #{response}"
+        if json['success'] != 1 || json['code'] || json['balances'].nil?
+          raise "BitBay API importer: Invalid response: #{response.body}"
         end
+
+        json
       end
     end
   end

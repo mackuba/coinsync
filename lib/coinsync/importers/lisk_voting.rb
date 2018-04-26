@@ -1,5 +1,4 @@
 require 'bigdecimal'
-require 'json'
 require 'net/http'
 require 'time'
 require 'uri'
@@ -38,43 +37,25 @@ module CoinSync
       end
 
       def import_transactions(filename)
-        response = make_request('/getTransactionsByAddress', address: @address, limit: 1000)
+        json = make_request('/getTransactionsByAddress', address: @address, limit: 1000)
 
-        case response
-        when Net::HTTPSuccess
-          json = JSON.parse(response.body)
-
-          if json['success'] != true || !json['transactions']
-            raise "Lisk importer: Invalid response: #{response.body}"
-          end
-
-          rewards = json['transactions'].select { |tx| tx['senderDelegate'] }
-
-          File.write(filename, JSON.pretty_generate(rewards) + "\n")
-        when Net::HTTPBadRequest
-          raise "Lisk importer: Bad request: #{response}"
-        else
-          raise "Lisk importer: Bad response: #{response}"
+        if json['success'] != true || !json['transactions']
+          raise "Lisk importer: Invalid response: #{response.body}"
         end
+
+        rewards = json['transactions'].select { |tx| tx['senderDelegate'] }
+
+        File.write(filename, JSON.pretty_generate(rewards) + "\n")
       end
 
       def import_balances
-        response = make_request('/getAccount', address: @address)
+        json = make_request('/getAccount', address: @address)
 
-        case response
-        when Net::HTTPSuccess
-          json = JSON.parse(response.body)
-
-          if json['success'] != true || !json['balance']
-            raise "Lisk importer: Invalid response: #{response.body}"
-          end
-
-          [Balance.new(LISK, available: BigDecimal.new(json['balance']) / 100_000_000)]
-        when Net::HTTPBadRequest
-          raise "Lisk importer: Bad request: #{response}"
-        else
-          raise "Lisk importer: Bad response: #{response}"
+        if json['success'] != true || !json['balance']
+          raise "Lisk importer: Invalid response: #{response.body}"
         end
+
+        [Balance.new(LISK, available: BigDecimal.new(json['balance']) / 100_000_000)]
       end
 
       def read_transaction_list(source)
@@ -103,7 +84,7 @@ module CoinSync
         url = URI(BASE_URL + path)
         url.query = URI.encode_www_form(params)
 
-        Request.get(url)
+        Request.get_json(url)
       end
     end
   end
