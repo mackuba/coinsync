@@ -26,7 +26,7 @@ module CoinSync
               BigDecimal.new(1),
               from: tx.bought_currency,
               to: @target_currency,
-              date: tx.time.to_date
+              time: tx.time
             )
             tx.converted.bought_amount = tx.bought_amount * tx.converted.exchange_rate
           else
@@ -44,7 +44,7 @@ module CoinSync
               BigDecimal.new(1),
               from: tx.sold_currency,
               to: @target_currency,
-              date: tx.time.to_date
+              time: tx.time
             )
             tx.converted.sold_amount = tx.sold_amount * tx.converted.exchange_rate
           else

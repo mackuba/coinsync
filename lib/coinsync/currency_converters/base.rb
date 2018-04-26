@@ -23,20 +23,17 @@ module CoinSync
         @cache = Cache.new(self.class.name.downcase.split('::').last)
       end
 
-      def convert(amount, from:, to:, date:)
+      def convert(amount, from:, to:, time:)
         (amount > 0) or raise "#{self.class}: amount should be positive"
         (amount.is_a?(BigDecimal)) or raise "#{self.class}: 'amount' should be a BigDecimal"
-        (from.is_a?(FiatCurrency)) or raise "#{self.class}: 'from' should be a FiatCurrency"
-        (to.is_a?(FiatCurrency)) or raise "#{self.class}: 'to' should be a FiatCurrency"
-        (date.is_a?(Date)) or raise "#{self.class}: 'date' should be a Date"
 
-        if rate = @cache[from, to, date]
-          return rate * amount
-        else
-          rate = fetch_conversion_rate(from: from, to: to, date: date)
-          @cache[from, to, date] = rate
-          return rate * amount
-        end
+        rate = get_conversion_rate(from: from, to: to, time: time)
+
+        rate * amount
+      end
+
+      def get_conversion_rate(from:, to:, time:)
+        raise "not implemented"
       end
 
       def finalize
