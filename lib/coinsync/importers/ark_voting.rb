@@ -1,5 +1,5 @@
 require 'bigdecimal'
-require 'net/http'
+require 'json'
 require 'time'
 require 'uri'
 

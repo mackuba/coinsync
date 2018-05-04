@@ -1,6 +1,6 @@
 require 'base64'
 require 'bigdecimal'
-require 'net/http'
+require 'json'
 require 'openssl'
 require 'uri'
 

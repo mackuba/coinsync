@@ -1,4 +1,5 @@
 require 'bigdecimal'
+require 'json'
 require 'openssl'
 require 'uri'
 

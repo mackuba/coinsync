@@ -1,6 +1,3 @@
-require 'json'
-require 'net/http'
-
 require_relative 'base'
 require_relative '../request'
 

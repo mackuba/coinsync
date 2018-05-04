@@ -1,5 +1,3 @@
-require 'json'
-require 'net/http'
 require 'tzinfo'
 
 require_relative 'base'

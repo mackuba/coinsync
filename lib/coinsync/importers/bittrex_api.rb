@@ -1,5 +1,4 @@
 require 'bigdecimal'
-require 'net/http'
 require 'openssl'
 require 'uri'
 
