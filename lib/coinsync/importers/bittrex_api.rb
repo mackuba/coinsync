@@ -34,7 +34,7 @@ module CoinSync
         json = make_request('/account/getbalances')
 
         if json['success'] != true || !json['result']
-          raise "Bittrex importer: Invalid response: #{response.body}"
+          raise "Bittrex importer: Invalid response: #{json}"
         end
 
         return json['result'].select { |b|

@@ -45,7 +45,7 @@ module CoinSync
           json = make_request('/getTransactionsByAddress', address: @address, limit: limit, offset: offset)
 
           if json['success'] != true || !json['transactions']
-            raise "Ark importer: Invalid response: #{response.body}"
+            raise "Ark importer: Invalid response: #{json}"
           end
 
           break if json['transactions'].empty?
@@ -63,7 +63,7 @@ module CoinSync
         json = make_request('/getAccount', address: @address)
 
         if json['success'] != true || !json['balance']
-          raise "Ark importer: Invalid response: #{response.body}"
+          raise "Ark importer: Invalid response: #{json}"
         end
 
         [Balance.new(ARK, available: BigDecimal.new(json['balance']) / 100_000_000)]

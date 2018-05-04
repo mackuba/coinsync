@@ -48,7 +48,7 @@ module CoinSync
               sleep(4 * API_RENEWAL_INTERVAL)
               next
             else
-              raise "Kraken importer: Invalid response: #{response.body}"
+              raise "Kraken importer: Invalid response: #{json}"
             end
           end
 
@@ -56,7 +56,7 @@ module CoinSync
           list = data && data['ledger']
 
           if !list
-            raise "Kraken importer: No data returned: #{response.body}"
+            raise "Kraken importer: No data returned: #{json}"
           end
 
           break if list.empty?
@@ -72,7 +72,7 @@ module CoinSync
         json = make_request('/0/private/Balance')
 
         if !json['error'].empty? || !json['result']
-          raise "Kraken importer: Invalid response: #{response.body}"
+          raise "Kraken importer: Invalid response: #{json}"
         end
 
         return json['result'].map { |k, v|

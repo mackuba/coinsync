@@ -100,7 +100,7 @@ module CoinSync
           json = make_request('history', currency: currency, limit: 10000)
 
           if !json.is_a?(Array)
-            raise "BitBay API importer: Invalid response: #{response.body}"
+            raise "BitBay API importer: Invalid response: #{json}"
           end
 
           transactions.concat(json)
@@ -210,7 +210,7 @@ module CoinSync
         json = make_request('info')
 
         if json['success'] != 1 || json['code'] || json['balances'].nil?
-          raise "BitBay API importer: Invalid response: #{response.body}"
+          raise "BitBay API importer: Invalid response: #{json}"
         end
 
         json

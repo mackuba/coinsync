@@ -40,7 +40,7 @@ module CoinSync
         json = make_request('/getTransactionsByAddress', address: @address, limit: 1000)
 
         if json['success'] != true || !json['transactions']
-          raise "Lisk importer: Invalid response: #{response.body}"
+          raise "Lisk importer: Invalid response: #{json}"
         end
 
         rewards = json['transactions'].select { |tx| tx['senderDelegate'] }
@@ -52,7 +52,7 @@ module CoinSync
         json = make_request('/getAccount', address: @address)
 
         if json['success'] != true || !json['balance']
-          raise "Lisk importer: Invalid response: #{response.body}"
+          raise "Lisk importer: Invalid response: #{json}"
         end
 
         [Balance.new(LISK, available: BigDecimal.new(json['balance']) / 100_000_000)]

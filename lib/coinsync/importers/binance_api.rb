@@ -73,7 +73,7 @@ module CoinSync
             json = make_request('/v3/myTrades', limit: 500, fromId: lastId + 1, symbol: pair)
 
             if !json.is_a?(Array)
-              raise "Binance importer: Invalid response: #{response.body}"
+              raise "Binance importer: Invalid response: #{json}"
             elsif json.empty?
               break
             else
@@ -92,7 +92,7 @@ module CoinSync
         json = make_request('/v3/account')
 
         if json['code'] || !json['balances']
-          raise "Binance importer: Invalid response: #{response.body}"
+          raise "Binance importer: Invalid response: #{json}"
         end
 
         return json['balances'].select { |b|

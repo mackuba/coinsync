@@ -46,14 +46,14 @@ module CoinSync
         json = make_request('/order/dealt', limit: 100)
 
         if json['success'] != true || json['code'] != 'OK'
-          raise "Kucoin importer: Invalid response: #{response.body}"
+          raise "Kucoin importer: Invalid response: #{json}"
         end
 
         data = json['data']
         list = data && data['datas']
 
         if !list
-          raise "Kucoin importer: No data returned: #{response.body}"
+          raise "Kucoin importer: No data returned: #{json}"
         end
 
         File.write(filename, JSON.pretty_generate(list) + "\n")
@@ -67,14 +67,14 @@ module CoinSync
           json = make_request('/account/balances', limit: 20, page: page)
 
           if json['success'] != true || json['code'] != 'OK'
-            raise "Kucoin importer: Invalid response: #{response.body}"
+            raise "Kucoin importer: Invalid response: #{json}"
           end
 
           data = json['data']
           list = data && data['datas']
 
           if !list
-            raise "Kucoin importer: No data returned: #{response.body}"
+            raise "Kucoin importer: No data returned: #{json}"
           end
 
           full_list.concat(list)
