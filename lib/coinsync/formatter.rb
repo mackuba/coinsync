@@ -32,9 +32,12 @@ module CoinSync
       format_decimal(amount, precision: 8)
     end
 
+    def get_local_time(time)
+      @config.timezone ? @config.timezone.utc_to_local(time.utc) : time
+    end
+
     def format_time(time)
-      local_time = @config.timezone ? @config.timezone.utc_to_local(time.utc) : time
-      local_time.strftime(@config.time_format || '%Y-%m-%d %H:%M:%S')
+      get_local_time(time).strftime(@config.time_format || '%Y-%m-%d %H:%M:%S')
     end
 
     def parse_decimal(string)
