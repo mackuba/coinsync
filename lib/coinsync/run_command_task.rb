@@ -6,14 +6,14 @@ module CoinSync
       @config = config
     end
 
-    def run(source_name, command, args = [])
+    def run(source_name, command_name, args = [])
       source = @config.sources[source_name] or raise "Source not found in the config file: '#{source_name}'"
       importer = source.importer
 
-      if importer.class.registered_commands.include?(command.to_sym)
-        importer.send(command.to_sym, *args)
+      if command = importer.command(command_name)
+        command.run(args)
       else
-        raise "#{source_name}: no such command: #{command}"
+        raise "#{source_name}: no such command: #{command_name}"
       end
     end
   end

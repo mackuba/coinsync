@@ -13,7 +13,6 @@ module CoinSync
   module Importers
     class GateIO < Base
       register_importer :gateio
-      register_commands :find_all_pairs
 
       BASE_URL = "https://api.gate.io/api2/1"
 

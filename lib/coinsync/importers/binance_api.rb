@@ -13,7 +13,6 @@ module CoinSync
   module Importers
     class BinanceAPI < Base
       register_importer :binance_api
-      register_commands :find_all_pairs
 
       BASE_URL = "https://api.binance.com/api"
       BASE_COINS = ['BTC', 'ETH', 'BNB', 'USDT']
@@ -106,7 +105,19 @@ module CoinSync
         }
       end
 
-      def find_all_pairs
+      define_command :foo do
+        # usage 'lsadfkasfdh'
+        summary 'does foo'
+        description 'whatevers foo'
+
+        flag :l, :long, 'longer foo'
+      end
+
+      def foo(opts, args, cmd)
+        puts opts[:long] ? 'fooooooo' : 'foo'
+      end
+
+      define_command :find_all_pairs do
         info = make_request('/v1/exchangeInfo', {}, false)
         found = []
 
