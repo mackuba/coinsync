@@ -13,7 +13,6 @@ module CoinSync
   module Importers
     class BinanceAPI < Base
       register_importer :binance_api
-      register_commands :find_all_pairs
 
       BASE_URL = "https://api.binance.com/api"
       BASE_COINS = ['BTC', 'ETH', 'BNB', 'USDT']
@@ -106,25 +105,38 @@ module CoinSync
         }
       end
 
-      def find_all_pairs
-        info = make_request('/v1/exchangeInfo', {}, false)
-        found = []
+      define_wrapper_command do
+        summary 'Binance API importer'
+      end
 
-        info['symbols'].each do |data|
-          symbol = data['symbol']
-          trades = make_request('/v3/myTrades', limit: 1, symbol: symbol)
+      define_command :find_all_pairs do
+        summary 'scans all available trading pairs and finds those which you have traded before'
+        description "Unfortunately, the Binance API currently doesn't allow loading transaction " +
+          "history for all pairs in one go, and checking all possible pairs would take too much time, " +
+          "so you need to explicitly specify the list of pairs to be downloaded in the config file. " +
+          "This task helps you collect that list by scanning all available trading pairs. It may take " +
+          "about 5-10 minutes to complete, that's why this isn't done automatically during the import."
 
-          if trades.length > 0
-            print '*'
-            found << symbol
-          else
-            print '.'
+        run do |opts, args, cmd|
+          info = make_request('/v1/exchangeInfo', {}, false)
+          found = []
+
+          info['symbols'].each do |data|
+            symbol = data['symbol']
+            trades = make_request('/v3/myTrades', limit: 1, symbol: symbol)
+
+            if trades.length > 0
+              print '*'
+              found << symbol
+            else
+              print '.'
+            end
           end
-        end
 
-        puts
-        puts "Trading pairs found:"
-        puts found.sort
+          puts
+          puts "Trading pairs found:"
+          puts found.sort
+        end
       end
 
       def read_transaction_list(source)

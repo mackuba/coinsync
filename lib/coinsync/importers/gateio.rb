@@ -13,7 +13,6 @@ module CoinSync
   module Importers
     class GateIO < Base
       register_importer :gateio
-      register_commands :find_all_pairs
 
       BASE_URL = "https://api.gate.io/api2/1"
 
@@ -80,28 +79,41 @@ module CoinSync
         end
       end
 
-      def find_all_pairs
-        pairs = make_request('/pairs', {}, false)
-        found = []
+      define_wrapper_command do
+        summary 'Gate.io API importer'
+      end
 
-        pairs.each do |pair|
-          json = make_request('/private/tradeHistory', currencyPair: pair)
+      define_command :find_all_pairs do
+        summary 'scans all available trading pairs and finds those which you have traded before'
+        description "Unfortunately, the Gate.io API currently doesn't allow loading transaction " +
+          "history for all pairs in one go, and checking all possible pairs would take too much time, " +
+          "so you need to explicitly specify the list of pairs to be downloaded in the config file. " +
+          "This task helps you collect that list by scanning all available trading pairs. It may take " +
+          "about 5-10 minutes to complete, that's why this isn't done automatically during the import."
 
-          if json['result'] != 'true' || !json['trades']
-            raise "Gate.io importer: Invalid response: #{json}"
+        run do |opts, args, cmd|
+          pairs = make_request('/pairs', {}, false)
+          found = []
+
+          pairs.each do |pair|
+            json = make_request('/private/tradeHistory', currencyPair: pair)
+
+            if json['result'] != 'true' || !json['trades']
+              raise "Gate.io importer: Invalid response: #{json}"
+            end
+
+            if json['trades'].length > 0
+              print '*'
+              found << pair
+            else
+              print '.'
+            end
           end
 
-          if json['trades'].length > 0
-            print '*'
-            found << pair
-          else
-            print '.'
-          end
+          puts
+          puts "Trading pairs found:"
+          puts found.sort
         end
-
-        puts
-        puts "Trading pairs found:"
-        puts found.sort
       end
 
       def read_transaction_list(source)

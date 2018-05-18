@@ -3,4 +3,5 @@
 require 'bundler/setup'
 require 'coinsync/cli'
 
-CoinSync::CLI.new.execute(ARGV)
+CoinSync::CLI::Preflight.run(ARGV)
+CoinSync::CLI::App.run(ARGV)
