@@ -106,30 +106,17 @@ module CoinSync
       end
 
       define_wrapper_command do
-        # usage 'lsadfkasfdh'
-        summary 'does foo'
-        description 'whatevers foo'
-      end
-
-      define_command :foo do
-        # usage 'lsadfkasfdh'
-        summary 'does foo'
-        description 'whatevers foo'
-
-        flag :l, :long, 'longer foo'
-
-        flag :h, :help, 'show help for this command' do |value, cmd|
-          puts cmd.help
-          exit 0
-        end
-
-        run do |opts, args, cmd|
-          p [opts, args]
-          puts opts[:long] ? 'fooooooo' : 'foo'
-        end
+        summary 'Binance API importer'
       end
 
       define_command :find_all_pairs do
+        summary 'scans all available trading pairs and finds those which you have traded before'
+        description "Unfortunately, the Binance API currently doesn't allow loading transaction " +
+          "history for all pairs in one go, and checking all possible pairs would take too much time, " +
+          "so you need to explicitly specify the list of pairs to be downloaded in the config file. " +
+          "This task helps you collect that list by scanning all available trading pairs. It may take " +
+          "about 5-10 minutes to complete, that's why this isn't done automatically during the import."
+
         run do |opts, args, cmd|
           info = make_request('/v1/exchangeInfo', {}, false)
           found = []

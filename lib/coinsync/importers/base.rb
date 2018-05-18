@@ -58,6 +58,8 @@ module CoinSync
 
         dsl = Cri::CommandDSL.new(command)
         dsl.name(key.to_s)
+        dsl.description("Add a name of one of the custom commands listed below to run it on the given importer.")
+        dsl.usage "#{key} <command> [options...]"
 
         if block = self.class.commands[nil]
           dsl.instance_eval(&block)
@@ -72,6 +74,7 @@ module CoinSync
 
           dsl = Cri::CommandDSL.new(command)
           dsl.name(name.to_s)
+          dsl.usage(name.to_s)
           dsl.instance_eval(&block)
 
           run_block = command.block
