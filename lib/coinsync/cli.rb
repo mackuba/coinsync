@@ -11,6 +11,45 @@ require_relative 'version'
 
 module CoinSync
   module CLI
+    class << self
+      attr_accessor :config
+
+      def parse_sources(args)
+        SourceFilter.new.parse_command_line_args(args)
+      end
+
+      def generate_importer_commands
+        run = App.command_named('run')
+
+        config.sources.values.each do |source|
+          importer = source.importer
+
+          if !importer.registered_commands.empty?
+            wrapper = importer.wrapper_command(source.key)
+            run.add_command(wrapper)
+
+            importer.registered_commands.each do |command_name|
+              wrapper.add_command(importer.command(command_name))
+            end
+          end
+        end
+      end
+    end
+
+    Preflight = Cri::Command.define do
+      optional :c, :config, 'path to a custom config file'
+
+      flag :v, :version, 'print version number' do |value, cmd|
+        puts CoinSync::VERSION
+        exit 0
+      end
+
+      run do |opts, args, cmd|
+        CLI.config = Config.load_from_file(opts[:config])
+        CLI.generate_importer_commands
+      end
+    end
+
     App = Cri::Command.define do
       name 'coinsync'
       usage 'lsadfkasfdh'
@@ -22,21 +61,6 @@ module CoinSync
       flag :h, :help, 'show help for this command' do |value, cmd|
         puts cmd.help
         exit 0
-      end
-
-      flag :v, :version, 'print version number' do |value, cmd|
-        puts CoinSync::VERSION
-        exit 0
-      end
-    end
-
-    class << self
-      def load_config(opts)
-        Config.load_from_file(opts[:config])
-      end
-
-      def parse_sources(args)
-        SourceFilter.new.parse_command_line_args(args)
       end
     end
 
@@ -50,10 +74,9 @@ module CoinSync
       #   parameter '[SOURCE] ...', 'specific sources to check balance on'
 
       run do |opts, args, cmd|
-        config = CLI.load_config(opts)
         selected, except = CLI.parse_sources(args)
 
-        task = BalanceTask.new(config)
+        task = BalanceTask.new(CLI.config)
         task.run(selected, except)
       end
     end
@@ -65,10 +88,9 @@ module CoinSync
       #   parameter '[SOURCE] ...', 'specific sources to import'
 
       run do |opts, args, cmd|
-        config = CLI.load_config(opts)
         selected, except = CLI.parse_sources(args)
 
-        task = ImportTask.new(config)
+        task = ImportTask.new(CLI.config)
         task.run(selected, except)
       end
     end
@@ -80,10 +102,9 @@ module CoinSync
       #   parameter 'OUTPUT', 'selected task to perform on the combined list'
 
       run do |opts, args, cmd|
-        config = CLI.load_config(opts)
         output_name, *rest = args
 
-        task = BuildTask.new(config)
+        task = BuildTask.new(CLI.config)
         task.run(output_name, rest)
       end
     end
@@ -92,36 +113,9 @@ module CoinSync
       summary 'execute a custom action from one of the configured importers'
       usage 'LBLBLblbldfbsdfbl'
 
-      option :h, :help, 'print help'
-
       # TODO description ''
       #   parameter 'SOURCE', 'name of a configured source'
       #   parameter 'COMMAND', 'name of a command defined for that source'
-
-      run do |opts, args, cmd|
-        config = CLI.load_config(opts)
-
-        config.sources.values.each do |source|
-          importer = source.importer
-
-          if !importer.registered_commands.empty?
-            wrapper = importer.wrapper_command(source.key)
-            cmd.add_command(wrapper)
-
-            importer.registered_commands.each do |command_name|
-              wrapper.add_command(importer.command(command_name))
-            end
-          end
-        end
-
-        new_args = opts[:help] ? args + ['--help'] : args
-
-        cmd.block = proc {
-          puts cmd.help if opts[:help]
-        }
-
-        cmd.run(new_args)
-      end
     end
   end
 end
