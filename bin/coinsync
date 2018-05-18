@@ -3,4 +3,4 @@
 require 'bundler/setup'
 require 'coinsync/cli'
 
-CoinSync::CLI.run
+CoinSync::CLI::App.run(ARGV)
