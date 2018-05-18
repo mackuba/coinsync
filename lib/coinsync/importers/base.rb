@@ -60,6 +60,9 @@ module CoinSync
         dsl.name(key.to_s)
         dsl.description("Add a name of one of the custom commands listed below to run it on the given importer.")
         dsl.usage "#{key} <command> [options...]"
+        dsl.run do |opts, args, cmd|
+          puts cmd.help
+        end
 
         if block = self.class.commands[nil]
           dsl.instance_eval(&block)

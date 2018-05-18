@@ -63,6 +63,25 @@ module CoinSync
         puts cmd.help
         exit 0
       end
+
+      default_subcommand 'help'
+    end
+
+    App.define_command('help') do
+      summary 'Print help about a given command'
+      usage 'help <command> [<subcommand>...]'
+      description "Use this to see a message like this about any given command :)"
+
+      run do |opts, args, cmd|
+        current = App
+        path = args.dup
+
+        while name = path.shift
+          current = current.command_named(name)
+        end
+
+        puts current.help
+      end
     end
 
     App.define_command('balance') do
@@ -116,8 +135,12 @@ module CoinSync
       run do |opts, args, cmd|
         output_name, *rest = args
 
-        task = BuildTask.new(CLI.config)
-        task.run(output_name, rest)
+        if output_name
+          task = BuildTask.new(CLI.config)
+          task.run(output_name, rest)
+        else
+          puts cmd.help
+        end
       end
     end
 
@@ -126,6 +149,10 @@ module CoinSync
       usage 'run <source> <command> [args]'
       description "Some importers may have custom commands implemented that only make sense for a given " +
         "importer. This allows you to run these commands from the command line."
+
+      run do |opts, args, cmd|
+        puts cmd.help
+      end
     end
   end
 end
