@@ -1,4 +1,4 @@
-require 'optparse'
+require 'clamp'
 
 require_relative 'balance_task'
 require_relative 'build_task'
@@ -6,87 +6,78 @@ require_relative 'config'
 require_relative 'import_task'
 require_relative 'run_command_task'
 require_relative 'source_filter'
+require_relative 'version'
 
 module CoinSync
-  class CLI
-    def initialize
-      @option_parser = OptionParser.new
-    end
-
-    def execute(args)
-      @option_parser.on('-cCONFIG', '--config CONFIG') { |c| @config_file = c }
-      @option_parser.parse!
-
-      command = args.shift
-
-      if command.nil?
-        print_help
-      elsif [:balance, :import, :build, :run].include?(command.to_sym)
-        @config = load_config
-        self.send(command, args)
-      else
-        raise "Unknown command #{command}"
+  class CLI < Clamp::Command
+    module GlobalOptions
+      def self.included(base)
+        base.option ['-c', '--config'], 'CONFIG_FILE', 'path to a custom config file', attribute_name: 'config_file'
       end
     end
 
-    def print_help
-      puts "Usage:"
-      puts "  coinsync balance [source1 source2 ^excluded_source...]"
-      puts "    - imports and prints wallet balances from all or selected sources"
-      puts
-      puts "  coinsync import [source1 source2 ^excluded_source...]"
-      puts "    - imports transaction histories from all or selected sources to files listed in the config"
-      puts
-      puts "  coinsync build list"
-      puts "    - merges all transaction histories into a single list and saves it to build/list.csv"
-      puts
-      puts "  coinsync build fifo"
-      puts "    - merges all transaction histories into a single list, calculates transaction"
-      puts "      profits using FIFO and saves the result to build/fifo.csv"
-      puts
-      puts "  coinsync build summary"
-      puts "    - merges all transaction histories into a single list and calculates how many"
-      puts "      units of each token you should have in total now"
-      puts
-      puts "  coinsync run <source> <command> [args]"
-      puts "    - executes a custom action from one of the configured importers (see docs for more info)"
-      puts
-      puts "  * add -c file.yml / --config file.yml to use a custom config path instead of config.yml"
-      puts
+    include GlobalOptions
+
+    option "--version", :flag, "Show version" do
+      puts CoinSync::VERSION
+      exit
     end
 
-    def balance(args)
-      selected, except = parse_sources(args)
-      task = BalanceTask.new(@config)
-      task.run(selected, except)
+
+    class Command < Clamp::Command
+      include GlobalOptions
+
+      def config
+        Config.load_from_file(config_file)
+      end
+
+      def parse_sources(args)
+        SourceFilter.new.parse_command_line_args(args)
+      end
     end
 
-    def import(args)
-      selected, except = parse_sources(args)
-      task = ImportTask.new(@config)
-      task.run(selected, except)
+    class BalanceCommand < Command
+      parameter '[SOURCE] ...', 'specific sources to check balance on'
+
+      def execute
+        selected, except = parse_sources(source_list)
+        task = BalanceTask.new(config)
+        task.run(selected, except)
+      end
     end
 
-    def build(args)
-      output_name = args.shift
-      task = BuildTask.new(@config)
-      task.run(output_name, args)
+    class ImportCommand < Command
+      parameter '[SOURCE] ...', 'specific sources to import'
+
+      def execute
+        selected, except = parse_sources(source_list)
+        task = ImportTask.new(config)
+        task.run(selected, except)
+      end
     end
 
-    def run(args)
-      source = args.shift or (puts "Usage: coinsync run <source> <command> [args]"; exit 1)
-      command = args.shift or (puts "Usage: coinsync run <source> <command> [args]"; exit 1)
+    class BuildCommand < Command
+      parameter 'OUTPUT', 'selected task to perform on the combined list'
 
-      task = RunCommandTask.new(@config)
-      task.run(source, command, args)
+      def execute
+        task = BuildTask.new(config)
+        task.run(output, args)
+      end
     end
 
-    def load_config
-      Config.load_from_file(@config_file)
+    class RunCommand < Command
+      parameter 'SOURCE', 'name of a configured source'
+      parameter 'COMMAND', 'name of a command defined for that source'
+
+      def execute
+        task = RunCommandTask.new(config)
+        task.run(source, command, args)
+      end
     end
 
-    def parse_sources(args)
-      SourceFilter.new.parse_command_line_args(args)
-    end
+    subcommand 'balance', 'Import and print wallet balances from all or selected sources', BalanceCommand
+    subcommand 'import', 'Import transaction histories from all or selected sources', ImportCommand
+    subcommand 'build', 'Merge all transaction histories and then save or process them as a single list', BuildCommand
+    subcommand 'run', 'Execute a custom action from one of the configured importers', RunCommand
   end
 end
