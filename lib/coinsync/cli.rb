@@ -8,6 +8,39 @@ require_relative 'run_command_task'
 require_relative 'source_filter'
 require_relative 'version'
 
+# temporary (?) hack to allow ignoring unknown options
+class Cri::OptionParser
+  def run
+    @running = true
+
+    while running?
+      # Get next item
+      e = @unprocessed_arguments_and_options.shift
+      break if e.nil?
+
+      begin
+        if e == '--'
+          handle_dashdash(e)
+        elsif e =~ /^--./ && !@no_more_options
+          handle_dashdash_option(e)
+        elsif e =~ /^-./ && !@no_more_options
+          handle_dash_option(e)
+        else
+          add_argument(e)
+        end
+      rescue IllegalOptionError
+        add_argument(e)
+      end
+    end
+
+    add_defaults
+
+    self
+  ensure
+    @running = false
+  end
+end
+
 module CoinSync
   module CLI
     App = Cri::Command.define do
