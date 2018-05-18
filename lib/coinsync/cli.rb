@@ -1,4 +1,5 @@
 require 'cri'
+require_relative 'cri_hax'
 
 require_relative 'balance_task'
 require_relative 'build_task'
@@ -7,39 +8,6 @@ require_relative 'import_task'
 require_relative 'run_command_task'
 require_relative 'source_filter'
 require_relative 'version'
-
-# temporary (?) hack to allow ignoring unknown options
-class Cri::OptionParser
-  def run
-    @running = true
-
-    while running?
-      # Get next item
-      e = @unprocessed_arguments_and_options.shift
-      break if e.nil?
-
-      begin
-        if e == '--'
-          handle_dashdash(e)
-        elsif e =~ /^--./ && !@no_more_options
-          handle_dashdash_option(e)
-        elsif e =~ /^-./ && !@no_more_options
-          handle_dash_option(e)
-        else
-          add_argument(e)
-        end
-      rescue IllegalOptionError
-        add_argument(e)
-      end
-    end
-
-    add_defaults
-
-    self
-  ensure
-    @running = false
-  end
-end
 
 module CoinSync
   module CLI
@@ -55,6 +23,11 @@ module CoinSync
         puts cmd.help
         exit 0
       end
+
+      flag :v, :version, 'print version number' do |value, cmd|
+        puts CoinSync::VERSION
+        exit 0
+      end
     end
 
     class << self
@@ -67,14 +40,12 @@ module CoinSync
       end
     end
 
-  #   option "--version", :flag, "Show version" do
-  #     puts CoinSync::VERSION
-  #     exit
-  #   end
-
     App.define_command('balance') do
       summary 'import and print wallet balances from all or selected sources'
       usage 'LBLBLblbldfbsdfbl'
+      
+      option :f, :format, 'format to use'
+
       # TODO description ''
       #   parameter '[SOURCE] ...', 'specific sources to check balance on'
 
@@ -120,21 +91,36 @@ module CoinSync
     App.define_command('run') do
       summary 'execute a custom action from one of the configured importers'
       usage 'LBLBLblbldfbsdfbl'
+
+      option :h, :help, 'print help'
+
       # TODO description ''
       #   parameter 'SOURCE', 'name of a configured source'
       #   parameter 'COMMAND', 'name of a command defined for that source'
 
       run do |opts, args, cmd|
         config = CLI.load_config(opts)
-        source, command, *rest = args
- 
-        if source.nil? || command.nil?
-          puts "Usage: coinsync run <source> <command> [args]"
-          exit 1
+
+        config.sources.values.each do |source|
+          importer = source.importer
+
+          if !importer.registered_commands.empty?
+            wrapper = importer.wrapper_command(source.key)
+            cmd.add_command(wrapper)
+
+            importer.registered_commands.each do |command_name|
+              wrapper.add_command(importer.command(command_name))
+            end
+          end
         end
 
-        task = RunCommandTask.new(config)
-        task.run(source, command, rest)
+        new_args = opts[:help] ? args + ['--help'] : args
+
+        cmd.block = proc {
+          puts cmd.help if opts[:help]
+        }
+
+        cmd.run(new_args)
       end
     end
   end

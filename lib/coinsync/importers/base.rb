@@ -7,7 +7,7 @@ module CoinSync
     end
 
     class Base
-      class Command < Cri::Command
+      class ImporterCommand < Cri::Command
         attr_accessor :importer
 
         def initialize(importer)
@@ -28,8 +28,16 @@ module CoinSync
         @commands ||= {}
       end
 
+      def self.registered_commands
+        commands.keys.compact
+      end
+
       def self.define_command(name, &block)
         commands[name.to_sym] = block
+      end
+
+      def self.define_wrapper_command(&block)
+        commands[nil] = block
       end
 
       def initialize(config, params = {})
@@ -41,14 +49,38 @@ module CoinSync
         true
       end
 
+      def registered_commands
+        self.class.registered_commands
+      end
+
+      def wrapper_command(key)
+        command = ImporterCommand.new(self)
+
+        dsl = Cri::CommandDSL.new(command)
+        dsl.name(key.to_s)
+
+        if block = self.class.commands[nil]
+          dsl.instance_eval(&block)
+        end
+
+        command
+      end
+
       def command(name)
         if block = self.class.commands[name.to_sym]
-          dsl = Cri::CommandDSL.new(Command.new(self))
+          command = ImporterCommand.new(self)
+
+          dsl = Cri::CommandDSL.new(command)
+          dsl.name(name.to_s)
           dsl.instance_eval(&block)
+
+          run_block = command.block
+
           dsl.run do |opts, args, cmd|
-            cmd.importer.send(name, opts, args, cmd)
+            cmd.importer.instance_exec(opts, args, cmd, &run_block)
           end
-          dsl.command
+
+          command
         else
           nil
         end

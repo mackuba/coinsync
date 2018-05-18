@@ -105,37 +105,51 @@ module CoinSync
         }
       end
 
+      define_wrapper_command do
+        # usage 'lsadfkasfdh'
+        summary 'does foo'
+        description 'whatevers foo'
+      end
+
       define_command :foo do
         # usage 'lsadfkasfdh'
         summary 'does foo'
         description 'whatevers foo'
 
         flag :l, :long, 'longer foo'
-      end
 
-      def foo(opts, args, cmd)
-        puts opts[:long] ? 'fooooooo' : 'foo'
+        flag :h, :help, 'show help for this command' do |value, cmd|
+          puts cmd.help
+          exit 0
+        end
+
+        run do |opts, args, cmd|
+          p [opts, args]
+          puts opts[:long] ? 'fooooooo' : 'foo'
+        end
       end
 
       define_command :find_all_pairs do
-        info = make_request('/v1/exchangeInfo', {}, false)
-        found = []
+        run do |opts, args, cmd|
+          info = make_request('/v1/exchangeInfo', {}, false)
+          found = []
 
-        info['symbols'].each do |data|
-          symbol = data['symbol']
-          trades = make_request('/v3/myTrades', limit: 1, symbol: symbol)
+          info['symbols'].each do |data|
+            symbol = data['symbol']
+            trades = make_request('/v3/myTrades', limit: 1, symbol: symbol)
 
-          if trades.length > 0
-            print '*'
-            found << symbol
-          else
-            print '.'
+            if trades.length > 0
+              print '*'
+              found << symbol
+            else
+              print '.'
+            end
           end
-        end
 
-        puts
-        puts "Trading pairs found:"
-        puts found.sort
+          puts
+          puts "Trading pairs found:"
+          puts found.sort
+        end
       end
 
       def read_transaction_list(source)
