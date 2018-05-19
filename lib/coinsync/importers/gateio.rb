@@ -85,11 +85,13 @@ module CoinSync
 
       define_command :find_all_pairs do
         summary 'scans all available trading pairs and finds those which you have traded before'
-        description "Unfortunately, the Gate.io API currently doesn't allow loading transaction " +
-          "history for all pairs in one go, and checking all possible pairs would take too much time, " +
-          "so you need to explicitly specify the list of pairs to be downloaded in the config file. " +
-          "This task helps you collect that list by scanning all available trading pairs. It may take " +
-          "about 5-10 minutes to complete, that's why this isn't done automatically during the import."
+        description <<~DOC
+          Unfortunately, the Gate.io API currently doesn't allow loading transaction
+          history for all pairs in one go, and checking all possible pairs would take too much time,
+          so you need to explicitly specify the list of pairs to be downloaded in the config file.
+          This task helps you collect that list by scanning all available trading pairs. It may take
+          about 5-10 minutes to complete, that's why this isn't done automatically during the import.
+        DOC
 
         run do |opts, args, cmd|
           pairs = make_request('/pairs', {}, false)
