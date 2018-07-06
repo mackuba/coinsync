@@ -31,8 +31,16 @@ module CoinSync
           @asset, @currency = parse_coins(hash['symbol'])
 
           if (@buyer && @commission_asset != @asset) || (!@buyer && @commission_asset != @currency)
-            raise "Binance API: Unexpected fee: #{hash}"
+            raise "Binance API: Unexpected fee: #{hash}" unless bnb_fee?
           end
+        end
+
+        def bnb_fee?
+          @commission_asset.code == 'BNB'
+        end
+
+        def total_value
+          price * quantity
         end
 
         def parse_coins(symbol)
@@ -152,7 +160,7 @@ module CoinSync
             transactions << Transaction.new(
               exchange: 'Binance',
               time: entry.time,
-              bought_amount: entry.quantity - entry.commission,
+              bought_amount: (entry.bnb_fee?) ? entry.quantity : (entry.quantity - entry.commission),
               bought_currency: entry.asset,
               sold_amount: entry.price * entry.quantity,
               sold_currency: entry.currency
@@ -161,7 +169,7 @@ module CoinSync
             transactions << Transaction.new(
               exchange: 'Binance',
               time: entry.time,
-              bought_amount: entry.price * entry.quantity - entry.commission,
+              bought_amount: (entry.bnb_fee?) ? entry.total_value : (entry.total_value - entry.commission),
               bought_currency: entry.currency,
               sold_amount: entry.quantity,
               sold_currency: entry.asset
