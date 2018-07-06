@@ -185,9 +185,7 @@ Parameters:
 - api_key: API public key
 - api_secret: API secret key
 
-Create the API keys on your Kucoin profile page.
-
-**Warning**: there's currently no way to create an API key on Kucoin with partial permissions; any key you create will have full access to your account, including placing orders and making withdrawals. Be careful with it.
+Create the API keys on your Kucoin profile page. Only the "Read information" permission is required.
 
 ### Lisk Voting Rewards (`lisk_voting`)
 
