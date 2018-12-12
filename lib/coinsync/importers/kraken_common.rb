@@ -39,12 +39,16 @@ module CoinSync
 
         def self.parse_currency(code)
           case code
+          when 'ADA' then CryptoCurrency.new('ADA')
           when 'BCH' then CryptoCurrency.new('BCH')
+          when 'BSV' then CryptoCurrency.new('BSV')
           when 'DASH' then CryptoCurrency.new('DASH')
           when 'EOS' then CryptoCurrency.new('EOS')
           when 'GNO' then CryptoCurrency.new('GNO')
           when 'KFEE' then CryptoCurrency.new('KFEE')
+          when 'QTUM' then CryptoCurrency.new('QTUM')
           when 'USDT' then CryptoCurrency.new('USDT')
+          when 'XTZ' then CryptoCurrency.new('XTZ')
 
           when 'XDAO' then CryptoCurrency.new('DAO')
           when 'XETC' then CryptoCurrency.new('ETC')
