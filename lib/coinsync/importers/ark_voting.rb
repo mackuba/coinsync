@@ -49,7 +49,7 @@ module CoinSync
 
           break if json['transactions'].empty?
 
-          rewards = json['transactions'].select { |tx| tx['senderDelegate'] }
+          rewards = json['transactions'].select { |tx| tx['sender'] }
           transactions.concat(rewards)
 
           page += 1
