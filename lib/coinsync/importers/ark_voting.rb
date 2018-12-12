@@ -37,12 +37,11 @@ module CoinSync
       end
 
       def import_transactions(filename)
-        offset = 0
-        limit = 50
+        page = 1
         transactions = []
 
         loop do
-          json = make_request('/getTransactionsByAddress', address: @address, limit: limit, offset: offset)
+          json = make_request('/getTransactionsByAddress', address: @address, page: page)
 
           if json['success'] != true || !json['transactions']
             raise "Ark importer: Invalid response: #{json}"
@@ -53,7 +52,7 @@ module CoinSync
           rewards = json['transactions'].select { |tx| tx['senderDelegate'] }
           transactions.concat(rewards)
 
-          offset += limit
+          page += 1
         end
 
         File.write(filename, JSON.pretty_generate(transactions) + "\n")
