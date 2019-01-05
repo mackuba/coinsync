@@ -1,6 +1,7 @@
 require 'csv'
 
 require_relative 'base'
+require_relative 'list'
 require_relative '../currencies'
 require_relative '../currency_conversion_task'
 require_relative '../transaction'
