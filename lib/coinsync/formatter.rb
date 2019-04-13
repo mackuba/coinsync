@@ -15,7 +15,13 @@ module CoinSync
     end
 
     def format_float(value, precision:)
-      s = sprintf("%.#{precision}f", value)
+      rounded = if value.is_a?(BigDecimal)
+        value.round(precision, BigDecimal::ROUND_HALF_UP)
+      else
+        value.round(precision, half: :up)
+      end
+
+      s = sprintf("%.#{precision}f", rounded)
       s = s.gsub(/\./, @decimal_separator) if @decimal_separator
       s
     end
