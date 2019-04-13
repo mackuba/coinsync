@@ -59,7 +59,7 @@ module CoinSync
       end
 
       def import_balances
-        json = make_request('/getAccount', address: @address)
+        json = make_request('/getWallet', address: @address)
 
         if json['success'] != true || !json['balance']
           raise "Ark importer: Invalid response: #{json}"
