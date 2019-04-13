@@ -6,6 +6,14 @@ require_relative 'version'
 
 module CoinSync
   module Request
+    def self.logging_enabled
+      @logging_enabled
+    end
+
+    def self.logging_enabled=(enabled)
+      @logging_enabled = enabled
+    end
+
     [:get, :post].each do |method|
       define_singleton_method(method) do |url, &block|
         self.request(url, Net::HTTP.const_get(method.to_s.capitalize), &block)
@@ -28,6 +36,7 @@ module CoinSync
       Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
         request = request_type.new(url)
         request['USER_AGENT'] = "coinsync/#{CoinSync::VERSION}"
+        puts ">> #{url}" if Request.logging_enabled
 
         yield request if block_given?
 
