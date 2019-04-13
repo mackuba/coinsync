@@ -37,15 +37,39 @@ module CoinSync
       end
 
       def import_transactions(filename)
-        json = make_request('/getTransactionsByAddress', address: @address, limit: 1000)
+        offset = 0
+        transactions = []
 
-        if json['success'] != true || !json['transactions']
+        loop do
+          json = make_request('/getTransactionsByAddress', address: @address, limit: 100, offset: offset)
+
+          if json['success'] != true || !json['transactions']
+            raise "Lisk importer: Invalid response: #{json}"
+          end
+
+          list = json['transactions']
+          break if list.empty?
+
+          transactions.concat(list)
+          offset += list.length
+        end
+
+        senders = transactions.map { |tx| tx['senderId'] }.uniq.sort
+        delegates = senders.select { |s| check_if_delegate(s) }
+        
+        reward_transactions = transactions.select { |tx| delegates.include?(tx['senderId']) }
+
+        File.write(filename, JSON.pretty_generate(reward_transactions) + "\n")
+      end
+
+      def check_if_delegate(address)
+        json = make_request('/getAccount', address: address)
+
+        if json['success'] != true
           raise "Lisk importer: Invalid response: #{json}"
         end
 
-        rewards = json['transactions'].select { |tx| tx['senderDelegate'] }
-
-        File.write(filename, JSON.pretty_generate(rewards) + "\n")
+        json['delegate'] != nil
       end
 
       def import_balances
