@@ -25,13 +25,11 @@ module CoinSync
       MAX_TIME_DIFFERENCE = 5.0
       TRANSACTION_TYPES = [OP_PURCHASE, OP_SALE, OP_FEE]
 
-      POLISH_TIMEZONE = TZInfo::Timezone.get('Europe/Warsaw')
-
       class HistoryEntry
         attr_accessor :date, :amount, :type, :currency
 
         def initialize(hash)
-          @date = POLISH_TIMEZONE.local_to_utc(Time.parse(hash['time']))
+          @date = Time.parse(hash['time'] + ' +0000')
           @amount = BigDecimal.new(hash['amount'])
           @type = hash['operation_type']
           @currency = parse_currency(hash['currency'])
