@@ -85,7 +85,7 @@ module CoinSync
           )
         end
 
-        transactions.reverse
+        transactions
       end
 
       private
