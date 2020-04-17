@@ -14,7 +14,7 @@ module CoinSync
     class ArkVoting < Base
       register_importer :ark_voting
 
-      BASE_URL = "https://explorer.dafty.net/api"
+      BASE_URL = "https://explorer.ark.io/api"
       EPOCH_TIME = Time.parse('2017-03-21 13:00 UTC')
       ARK = CryptoCurrency.new('ARK')
 
@@ -36,36 +36,41 @@ module CoinSync
         @address && [:balances, :transactions].include?(type)
       end
 
+      def delegates
+        @delegates ||= load_delegates
+      end
+
       def import_transactions(filename)
         page = 1
         transactions = []
 
         loop do
-          json = make_request('/getTransactionsByAddress', address: @address, page: page)
+          json = make_request("/wallets/#{@address}/transactions", orderBy: 'timestamp:desc', page: page)
 
-          if json['success'] != true || !json['transactions']
+          if !json['meta'] || !json['data']
             raise "Ark importer: Invalid response: #{json}"
           end
 
-          break if json['transactions'].empty?
-
-          rewards = json['transactions'].select { |tx| tx['sender'] }
+          rewards = json['data'].select { |tx| tx['sender'] != @address && delegates.include?(tx['sender']) }
+          rewards.each { |r| r.delete('confirmations') }
           transactions.concat(rewards)
+
+          break if json['data'].empty? || !json['meta']['next']
 
           page += 1
         end
 
-        File.write(filename, JSON.pretty_generate(transactions) + "\n")
+        File.write(filename, JSON.pretty_generate(transactions.reverse) + "\n")
       end
 
       def import_balances
-        json = make_request('/getWallet', address: @address)
+        json = make_request("/wallets/#{@address}")
 
-        if json['success'] != true || !json['balance']
+        if !json['data'] || !json['data']['balance']
           raise "Ark importer: Invalid response: #{json}"
         end
 
-        [Balance.new(ARK, available: BigDecimal.new(json['balance']) / 100_000_000)]
+        [Balance.new(ARK, available: BigDecimal.new(json['data']['balance']) / 100_000_000)]
       end
 
       def read_transaction_list(source)
@@ -89,6 +94,28 @@ module CoinSync
       end
 
       private
+
+      def load_delegates
+        page = 1
+        delegates = []
+
+        loop do
+          json = make_request("/delegates", page: page)
+
+          if !json['meta'] || !json['data']
+            raise "Ark importer: Invalid response: #{json}"
+          end
+
+          addresses = json['data'].map { |j| j['address'] }
+          delegates.concat(addresses)
+
+          break if json['data'].empty? || !json['meta']['next']
+
+          page += 1
+        end
+
+        delegates
+      end
 
       def make_request(path, params = {})
         url = URI(BASE_URL + path)
