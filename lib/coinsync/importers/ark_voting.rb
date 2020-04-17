@@ -15,14 +15,13 @@ module CoinSync
       register_importer :ark_voting
 
       BASE_URL = "https://explorer.ark.io/api"
-      EPOCH_TIME = Time.parse('2017-03-21 13:00 UTC')
       ARK = CryptoCurrency.new('ARK')
 
       class HistoryEntry
         attr_accessor :timestamp, :amount
 
         def initialize(hash)
-          @timestamp = EPOCH_TIME + hash['timestamp']
+          @timestamp = Time.at(hash['timestamp']['unix'])
           @amount = BigDecimal.new(hash['amount']) / 100_000_000
         end
       end
