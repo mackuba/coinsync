@@ -56,8 +56,9 @@ module CoinSync
 
         senders = transactions.map { |tx| tx['senderId'] }.uniq.sort
         delegates = senders.select { |s| check_if_delegate(s) }
-        
+
         reward_transactions = transactions.select { |tx| delegates.include?(tx['senderId']) }
+        reward_transactions.each { |r| r.delete('confirmations') }
 
         File.write(filename, JSON.pretty_generate(reward_transactions) + "\n")
       end
