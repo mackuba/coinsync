@@ -84,56 +84,95 @@ module CoinSync
 
       module Common
         def build_transaction_list(entries)
-          set = []
+          previous = nil
           transactions = []
 
           entries.each do |entry|
-            if entry.type == 'transfer'
-              transactions << Transaction.new(
-                exchange: 'Kraken',
-                time: entry.time,
-                bought_amount: entry.amount,
-                bought_currency: entry.asset,
-                sold_amount: BigDecimal(0),
-                sold_currency: FiatCurrency.new(nil)
-              )
+            next if entry.type != 'transfer' && entry.type != 'trade'
+
+            if previous.nil?
+              previous = entry
               next
+            elsif previous.type == 'transfer'
+              if entry.type == 'transfer' && (matched_transaction = try_match_transfer(previous, entry))
+                transactions << matched_transaction
+                previous = nil
+              else
+                transactions << make_airdrop_transaction(previous)
+                previous = entry
+              end
+            else
+              if entry.type == 'trade'
+                matched_transaction = match_trade(previous, entry)
+                transactions << matched_transaction
+                previous = nil
+              else
+                raise "Kraken importer error: Couldn't match ledger lines - unmatched trade followed by transfer"
+              end
             end
-
-            next if entry.type != 'trade'
-
-            set << entry
-            next unless set.length == 2
-
-            if set[0].refid != set[1].refid
-              raise "Kraken importer error: Couldn't match a pair of ledger lines - ids don't match: #{set}"
-            end
-
-            if set.none? { |e| e.crypto? }
-              raise "Kraken importer error: Couldn't match a pair of ledger lines - " +
-                "no cryptocurrencies were exchanged: #{set}"
-            end
-
-            bought = set.detect { |e| e.amount > 0 }
-            sold = set.detect { |e| e.amount < 0 }
-
-            if bought.nil? || sold.nil?
-              raise "Kraken importer error: Couldn't match a pair of ledger lines - invalid transaction amounts: #{set}"
-            end
-
-            transactions << Transaction.new(
-              exchange: 'Kraken',
-              time: [bought.time, sold.time].max,
-              bought_amount: bought.amount - bought.fee,
-              bought_currency: bought.asset,
-              sold_amount: -(sold.amount - sold.fee),
-              sold_currency: sold.asset
-            )
-
-            set.clear
           end
 
           transactions
+        end
+
+        def make_airdrop_transaction(entry)
+          Transaction.new(
+            exchange: 'Kraken',
+            time: entry.time,
+            bought_amount: entry.amount,
+            bought_currency: entry.asset,
+            sold_amount: BigDecimal(0),
+            sold_currency: FiatCurrency.new(nil)
+          )
+        end
+
+        def try_match_transfer(first, second)
+          pair = [first, second]
+
+          return nil if second.time - first.time > 10
+
+          bought = pair.detect { |e| e.amount > 0 }
+          sold = pair.detect { |e| e.amount < 0 }
+
+          return nil unless bought && sold && pair.all? { |e| e.crypto? }
+
+          Transaction.new(
+            exchange: 'Kraken',
+            time: [bought.time, sold.time].max,
+            bought_amount: bought.amount - bought.fee,
+            bought_currency: bought.asset,
+            sold_amount: -(sold.amount - sold.fee),
+            sold_currency: sold.asset
+          )
+        end
+
+        def match_trade(first, second)
+          pair = [first, second]
+
+          if first.refid != second.refid
+            raise "Kraken importer error: Couldn't match a pair of ledger lines - ids don't match: #{pair}"
+          end
+
+          if pair.none? { |e| e.crypto? }
+            raise "Kraken importer error: Couldn't match a pair of ledger lines - " +
+              "no cryptocurrencies were exchanged: #{pair}"
+          end
+
+          bought = pair.detect { |e| e.amount > 0 }
+          sold = pair.detect { |e| e.amount < 0 }
+
+          if bought.nil? || sold.nil?
+            raise "Kraken importer error: Couldn't match a pair of ledger lines - invalid transaction amounts: #{pair}"
+          end
+
+          Transaction.new(
+            exchange: 'Kraken',
+            time: [bought.time, sold.time].max,
+            bought_amount: bought.amount - bought.fee,
+            bought_currency: bought.asset,
+            sold_amount: -(sold.amount - sold.fee),
+            sold_currency: sold.asset
+          )
         end
       end
     end
