@@ -1,8 +1,9 @@
+require_relative 'date_filter'
 require_relative 'importers/all'
 
 module CoinSync
   class Source
-    attr_reader :key, :params, :filename
+    attr_reader :key, :params, :filename, :date_filters
 
     def initialize(config, key)
       @config = config
@@ -33,6 +34,14 @@ module CoinSync
           raise "Unknown source type for '#{key}': please include a 'type' parameter " +
             "or use a name of an existing importer"
         end
+      end
+
+      if params['include_dates'].is_a?(Hash)
+        @date_filters = [DateFilter.new(params['include_dates'])]
+      elsif params['include_dates'].is_a?(Array)
+        @date_filters = params['include_dates'].map { |h| DateFilter.new(h) }
+      else
+        @date_filters = [DateFilter.new]
       end
     end
 

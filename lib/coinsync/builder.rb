@@ -9,7 +9,7 @@ module CoinSync
     end
 
     def build_transaction_list
-      transactions = []
+      list = []
 
       @config.sources.each do |key, source|
         if source.importer.can_build?
@@ -18,14 +18,16 @@ module CoinSync
           end
 
           File.open(source.filename, 'r') do |file|
-            transactions.concat(source.importer.read_transaction_list(file))
+            transactions = source.importer.read_transaction_list(file)
+
+            list.concat(transactions.select { |tx| source.date_filters.any? { |f| f.range_includes(tx) }})
           end
         end
       end
 
-      transactions.each_with_index { |tx, i| tx.number = i + 1 }
+      list.each_with_index { |tx, i| tx.number = i + 1 }
 
-      @transactions = transactions.sort_by { |tx| [tx.time, tx.number] }
+      @transactions = list.sort_by { |tx| [tx.time, tx.number] }
       @transactions.each_with_index { |tx, i| tx.number = i + 1 }
     end
   end
