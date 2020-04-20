@@ -18,11 +18,18 @@ module CoinSync
       ARK = CryptoCurrency.new('ARK')
 
       class HistoryEntry
-        attr_accessor :timestamp, :amount
+        attr_accessor :timestamp, :amount, :recipient, :payments
 
         def initialize(hash)
           @timestamp = Time.at(hash['timestamp']['unix'])
           @amount = BigDecimal.new(hash['amount']) / 100_000_000
+          @recipient = hash['recipient']
+
+          if hash['asset']
+            if payments = hash['asset']['payments']
+              @payments = payments.map { |p| [p['recipientId'], BigDecimal.new(p['amount']) / 100_000_000] }.to_h
+            end
+          end
         end
       end
 
@@ -79,10 +86,12 @@ module CoinSync
         json.each do |hash|
           entry = HistoryEntry.new(hash)
 
+          amount = (entry.recipient == @address) ? entry.amount : entry.payments[@address]
+
           transactions << Transaction.new(
             exchange: 'Ark voting',
             time: entry.timestamp,
-            bought_amount: entry.amount,
+            bought_amount: amount,
             bought_currency: ARK,
             sold_amount: BigDecimal.new(0),
             sold_currency: FiatCurrency.new(nil)
