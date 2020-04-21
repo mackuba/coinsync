@@ -5,6 +5,8 @@ require 'uri'
 require_relative 'version'
 
 module CoinSync
+  class APIError < StandardError; end
+
   module Request
     def self.logging_enabled
       @logging_enabled
@@ -46,14 +48,15 @@ module CoinSync
 
     def self.request_text(url, request_type, &block)
       response = request(url, request_type, &block)
+      code_message = (response.message.to_s.empty?) ? response.code.to_s : "#{response.code} #{response.message}"
 
       case response
       when Net::HTTPSuccess
         response.body
       when Net::HTTPBadRequest
-        raise "Bad request: #{response}"
+        raise APIError, "Bad request: [#{code_message}] #{response.body}"
       else
-        raise "Bad response: #{response}"
+        raise APIError, "Bad response: [#{code_message}] #{response.body}"
       end
     end
 
