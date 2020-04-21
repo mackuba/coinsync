@@ -16,27 +16,29 @@ module CoinSync
       register_importer :kucoin_api
 
       BASE_URL = "https://api.kucoin.com"
+      OK_CODE = "200000"
 
       class HistoryEntry
-        attr_accessor :created_at, :amount, :direction, :coin_type, :coin_type_pair, :deal_value, :fee
+        attr_accessor :created_at, :amount, :direction, :coin, :base_asset, :deal_value, :fee
 
         def initialize(hash)
-          @created_at = Time.at(hash['createdAt'] / 1000)
-          @amount = BigDecimal.new(hash['amount'], 0)
-          @direction = hash['direction']
-          @coin_type = CryptoCurrency.new(hash['coinType'])
-          @coin_type_pair = CryptoCurrency.new(hash['coinTypePair'])
-          @deal_value = BigDecimal.new(hash['dealValue'], 0)
-          @fee = BigDecimal.new(hash['fee'], 0)
+          @created_at = Time.at(hash['createdAt'])
+          @amount = BigDecimal.new(hash['amount'])
+          @direction = hash['side']
+          @coin = CryptoCurrency.new(hash['symbol'].split('-')[0])
+          @base_asset = CryptoCurrency.new(hash['symbol'].split('-')[1])
+          @deal_value = BigDecimal.new(hash['dealValue'])
+          @fee = BigDecimal.new(hash['fee'])
         end
       end
 
       def initialize(config, params = {})
         super
 
-        # only "Read information" permission is required for the key
+        # only "General" permission is required for the key
         @api_key = params['api_key']
         @api_secret = params['api_secret']
+        @api_passphrase = params['api_passphrase']
       end
 
       def can_import?(type)
@@ -44,56 +46,55 @@ module CoinSync
       end
 
       def import_transactions(filename)
-        # TODO: what if there's more than 100? (looks like we might need to switch to loading each market separately…)
-        json = make_request('/order/dealt', limit: 100)
+        transactions = []
 
-        if json['success'] != true || json['code'] != 'OK'
-          raise "Kucoin importer: Invalid response: #{json}"
+        ['orders', 'hist-orders'].each do |group|
+          page = 1
+
+          loop do
+            json = make_request("/api/v1/#{group}", currentPage: page, pageSize: 100)
+
+            if json['code'] != OK_CODE || json['data'].nil?
+              raise "Kucoin importer: Invalid response: #{json}"
+            end
+
+            items = json['data']['items']
+
+            if !items
+              raise "Kucoin importer: No data returned: #{json}"
+            end
+
+            transactions.concat(items)
+
+            break if items.empty?
+
+            page += 1
+          end
         end
 
-        data = json['data']
-        list = data && data['datas']
-
-        if !list
-          raise "Kucoin importer: No data returned: #{json}"
-        end
-
-        File.write(filename, JSON.pretty_generate(list) + "\n")
+        File.write(filename, JSON.pretty_generate(transactions) + "\n")
       end
 
       def import_balances
-        page = 1
-        full_list = []
+        json = make_request('/api/v1/accounts')
 
-        loop do
-          json = make_request('/account/balances', limit: 20, page: page)
-
-          if json['success'] != true || json['code'] != 'OK'
-            raise "Kucoin importer: Invalid response: #{json}"
-          end
-
-          data = json['data']
-          list = data && data['datas']
-
-          if !list
-            raise "Kucoin importer: No data returned: #{json}"
-          end
-
-          full_list.concat(list)
-
-          page += 1
-          break if page > data['pageNos']
+        if json['code'] != OK_CODE || json['data'].nil?
+          raise "Kucoin importer: Invalid response: #{json}"
         end
 
-        full_list.delete_if { |b| b['balance'] == 0.0 && b['freezeBalance'] == 0.0 }
+        balances = json['data']
 
-        full_list.map do |b|
+        balances.map { |b|
           Balance.new(
-            CryptoCurrency.new(b['coinType']),
-            available: BigDecimal.new(b['balanceStr']),
-            locked: BigDecimal.new(b['freezeBalanceStr'])
+            CryptoCurrency.new(b['currency']),
+            available: BigDecimal.new(b['available']),
+            locked: BigDecimal.new(b['holds'])
           )
-        end
+        }.reject { |b|
+          b.available == 0 && b.locked == 0
+        }.group_by(&:currency).map { |currency, list|
+          list.inject { |sum, b| sum + b }
+        }
       end
 
       def read_transaction_list(source)
@@ -103,23 +104,23 @@ module CoinSync
         json.each do |hash|
           entry = HistoryEntry.new(hash)
 
-          if entry.direction == 'BUY'
+          if entry.direction == 'buy'
             transactions << Transaction.new(
               exchange: 'Kucoin',
               time: entry.created_at,
               bought_amount: entry.amount - entry.fee,
-              bought_currency: entry.coin_type,
+              bought_currency: entry.coin,
               sold_amount: entry.deal_value,
-              sold_currency: entry.coin_type_pair
+              sold_currency: entry.base_asset
             )
-          elsif entry.direction == 'SELL'
+          elsif entry.direction == 'sell'
             transactions << Transaction.new(
               exchange: 'Kucoin',
               time: entry.created_at,
               sold_amount: entry.amount,
-              sold_currency: entry.coin_type,
+              sold_currency: entry.coin,
               bought_amount: entry.deal_value - entry.fee,
-              bought_currency: entry.coin_type_pair
+              bought_currency: entry.base_asset
             )
           else
             raise "Kucoin importer error: unexpected entry direction '#{entry.direction}'"
@@ -131,22 +132,25 @@ module CoinSync
 
       private
 
-      def make_request(path, params = {})
-        (@api_key && @api_secret) or raise "Public and secret API keys must be provided"
+      def make_request(endpoint, params = {})
+        (@api_key && @api_secret && @api_passphrase) or raise "Public & secret keys and a passhprase must be provided"
 
-        endpoint = '/v1' + path
-        nonce = (Time.now.to_f * 1000).to_i
+        timestamp = (Time.now.to_f * 1000).to_i
         url = URI(BASE_URL + endpoint)
 
-        url.query = build_query_string(params)
+        unless params.empty?
+          url.query = build_query_string(params)
+        end
 
-        string_to_hash = Base64.strict_encode64("#{endpoint}/#{nonce}/#{url.query}")
-        hmac = OpenSSL::HMAC.hexdigest('sha256', @api_secret, string_to_hash)
+        string_to_hash = [timestamp, 'GET', endpoint, url.query ? "?#{url.query}" : ""].map(&:to_s).join
+        hmac = OpenSSL::HMAC.digest('sha256', @api_secret, string_to_hash)
+        signature = Base64.encode64(hmac).strip
 
         Request.get_json(url) do |request|
           request['KC-API-KEY'] = @api_key
-          request['KC-API-NONCE'] = nonce
-          request['KC-API-SIGNATURE'] = hmac
+          request['KC-API-SIGN'] = signature
+          request['KC-API-TIMESTAMP'] = timestamp
+          request['KC-API-PASSPHRASE'] = @api_passphrase
         end
       end
 
