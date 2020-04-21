@@ -30,6 +30,20 @@ module CoinSync
       end
     end
 
+    def self.retry(n)
+      # TODO: list types of errors to catch
+      (n-1).times do
+        begin
+          yield
+          return
+        rescue
+          next
+        end
+      end
+
+      yield
+    end
+
     private
 
     def self.request(url, request_type)
