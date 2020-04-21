@@ -10,8 +10,19 @@ require_relative 'version'
 
 module CoinSync
   module CLI
+    MIN_RUBY_VERSION = 2.4
+
     class << self
       attr_accessor :config
+
+      def check_ruby_version
+        version_f = RUBY_VERSION.split('.')[0..1].join('.').to_f
+
+        if version_f < MIN_RUBY_VERSION
+          puts "CoinSync requires Ruby #{MIN_RUBY_VERSION} or later."
+          exit 1
+        end
+      end
 
       def parse_sources(args)
         SourceFilter.new.parse_command_line_args(args)
