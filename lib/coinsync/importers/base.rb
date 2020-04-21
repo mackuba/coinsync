@@ -91,6 +91,12 @@ module CoinSync
           nil
         end
       end
+
+      def inspect
+        vars = self.instance_variables - [:@config]
+
+        self.to_s.chop + ' ' + vars.map { |k| "#{k}=#{self.instance_variable_get(k).inspect}" }.join(', ')
+      end
     end
   end
 end
