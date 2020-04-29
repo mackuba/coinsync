@@ -115,7 +115,7 @@ module CoinSync
         info = fetch_info
 
         info['balances'].select { |k, v|
-          v['available'].to_f > 0 || v['locked'].to_f > 0
+          (v['available'].to_f > 0 || v['locked'].to_f > 0) && !(['PLN', 'EUR', 'USD'].include?(k))
         }.map { |k, v|
           Balance.new(
             CryptoCurrency.new(k),
