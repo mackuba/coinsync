@@ -14,6 +14,22 @@ module CoinSync
       end
 
       def process_transactions(transactions, *args)
+        totals = calculate_totals(transactions)
+
+        rows = totals.map do |currency, amount|
+          [
+            currency.code,
+            @formatter.format_crypto(amount)
+          ]
+        end
+
+        printer = TablePrinter.new
+        printer.print_table(['Coin', 'Amount'], rows, alignment: [:ljust, :rjust])
+      end
+
+      private
+
+      def calculate_totals(transactions)
         totals = Hash.new { BigDecimal(0) }
 
         transactions.each do |tx|
@@ -33,15 +49,7 @@ module CoinSync
           end
         end
 
-        rows = totals.map do |currency, amount|
-          [
-            currency.code,
-            @formatter.format_crypto(amount)
-          ]
-        end
-
-        printer = TablePrinter.new
-        printer.print_table(['Coin', 'Amount'], rows, alignment: [:ljust, :rjust])
+        totals
       end
     end
   end

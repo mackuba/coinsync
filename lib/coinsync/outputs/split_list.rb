@@ -24,6 +24,11 @@ module CoinSync
       end
 
       def process_transactions(transactions, *args)
+        split_list = split_all_transactions(transactions)
+        super(split_list, *args)
+      end
+
+      def split_all_transactions(transactions)
         split_list = []
 
         transactions.each do |tx|
@@ -43,7 +48,7 @@ module CoinSync
           converter.process_transactions(split_list)
         end
 
-        super(split_list, *args)
+        split_list
       end
 
       def split_transaction(tx)
