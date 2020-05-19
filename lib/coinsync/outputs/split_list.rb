@@ -34,6 +34,9 @@ module CoinSync
         transactions.each do |tx|
           if tx.purchase? || tx.sale?
             split_list << tx
+          # todo:
+          elsif tx.bought_currency.code == 'VET' && tx.sold_currency.code == 'VEN'
+            split_list << tx
           else
             sale, purchase = split_transaction(tx)
             split_list << sale
