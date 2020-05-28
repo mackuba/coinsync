@@ -51,7 +51,7 @@ module CoinSync
 
       Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
         request = request_type.new(url)
-        request['USER_AGENT'] = "coinsync/#{CoinSync::VERSION}"
+        request['User-Agent'] = "coinsync/#{CoinSync::VERSION}"
         puts ">> #{url}" if Request.logging_enabled
 
         yield request if block_given?
