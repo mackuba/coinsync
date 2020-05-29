@@ -24,8 +24,8 @@ module CoinSync
         end
       end
 
-      def parse_sources(args)
-        SourceFilter.new.parse_command_line_args(args)
+      def source_filter(args)
+        SourceFilter.from_command_line_args(args)
       end
 
       def generate_importer_commands
@@ -107,10 +107,10 @@ module CoinSync
       DOC
 
       run do |opts, args, cmd|
-        selected, except = CLI.parse_sources(args)
+        filter = CLI.source_filter(args)
 
         task = BalanceTask.new(CLI.config)
-        task.run(selected, except)
+        task.run(filter)
       end
     end
 
@@ -127,10 +127,10 @@ module CoinSync
       DOC
 
       run do |opts, args, cmd|
-        selected, except = CLI.parse_sources(args)
+        filter = CLI.source_filter(args)
 
         task = ImportTask.new(CLI.config)
-        task.run(selected, except)
+        task.run(filter)
       end
     end
 

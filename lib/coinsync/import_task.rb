@@ -8,8 +8,10 @@ module CoinSync
       @config = config
     end
 
-    def run(selected = nil, except = nil)
-      @config.filtered_sources(selected, except).each do |key, source|
+    def run(source_filter = nil)
+      sources = source_filter ? source_filter.select_from(@config.sources) : @config.sources
+
+      sources.each do |key, source|
         importer = source.importer
         filename = source.filename
 

@@ -9,12 +9,14 @@ module CoinSync
       @formatter = Formatter.new(config)
     end
 
-    def run(selected = nil, except = nil)
+    def run(source_filter = nil)
       balances = {}
       columns = []
       rows = []
 
-      @config.filtered_sources(selected, except).each do |key, source|
+      sources = source_filter ? source_filter.select_from(@config.sources) : @config.sources
+
+      sources.each do |key, source|
         importer = source.importer
 
         if importer.respond_to?(:can_import?)

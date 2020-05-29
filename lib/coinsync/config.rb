@@ -35,25 +35,6 @@ module CoinSync
       @sources ||= Hash[@source_definitions.keys.map { |key| [key, Source.new(self, key)] }]
     end
 
-    def filtered_sources(selected, except = nil)
-      included = if selected.nil? || selected.empty?
-        sources.values
-      else
-        selected = [selected] unless selected.is_a?(Array)
-
-        selected.map do |key|
-          sources[key] or raise "Source not found in the config file: '#{key}'"
-        end
-      end
-
-      if except
-        except = [except] unless except.is_a?(Array)
-        included -= except.map { |key| sources[key] }
-      end
-
-      Hash[included.map { |source| [source.key, source] }]
-    end
-
     def base_cryptocurrencies
       settings['base_cryptocurrencies'] || ['USDT', 'BTC', 'ETH', 'BNB', 'KCS', 'LTC', 'BCH', 'NEO']
     end
