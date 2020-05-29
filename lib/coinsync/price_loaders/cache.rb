@@ -26,8 +26,12 @@ module CoinSync
       end
 
       def save
+        @prices.keys.each do |k|
+          @prices[k] = Hash[@prices[k].sort]
+        end
+
         FileUtils.mkdir_p(File.dirname(@filename))
-        File.write(@filename, JSON.generate(@prices))
+        File.write(@filename, JSON.pretty_generate(@prices))
       end
     end
   end
