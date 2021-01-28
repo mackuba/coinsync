@@ -15,7 +15,7 @@ module CoinSync
       register_importer :binance_api
 
       BASE_URL = "https://api.binance.com/api"
-      BASE_COINS = ['BTC', 'ETH', 'BNB', 'USDT']
+      BASE_COINS = ['BTC', 'ETH', 'BNB', 'USDT', 'USDC', 'BUSD', 'TUSD', 'PAX']
 
       class HistoryEntry
         attr_accessor :quantity, :commission, :commission_asset, :price, :time, :buyer, :asset, :currency
